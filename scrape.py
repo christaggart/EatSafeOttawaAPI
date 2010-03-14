@@ -11,11 +11,12 @@ DB_HOST = "localhost"
 DB_PASSWORD = "fsi"
 RESULTS_PER_PAGE = 10
 
-#c = urllib2.urlopen(XML_URL)
-#contents = c.read()
-#f = open('firstpage.xml', 'w')
-#f.write(contents)
-#f.close()
+# saved to a file for use in testing so we don't have to fetch the page each time
+c = urllib2.urlopen(XML_URL)
+contents = c.read()
+f = open('firstpage.xml', 'w')
+f.write(contents)
+f.close()
 
 f = open('firstpage.xml', 'r')
 fcontents = f.read()
