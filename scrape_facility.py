@@ -26,7 +26,7 @@ def parseFacilityPage(page):
 				print "ENGLISH INSPECTIONS"
 				for child in node.getElementsByTagName('inspection'):
 					if child.getAttribute('inspectionid') !="": #id
-						print "FOund Inspection ID" + child.getAttribute('inspectionid')
+						print "Found Inspection ID" + child.getAttribute('inspectionid')
 						inspection_id = child.getAttribute('inspectionid')
 						facilitydetailid = child.getAttribute('facilitydetailid')
 						inspection_date = child.getAttribute('inspectiondate')

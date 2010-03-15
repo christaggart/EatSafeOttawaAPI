@@ -210,27 +210,6 @@ for (var c=1;c<50;c++)
 	button.rowNum = c;
 	row.add(button);
 
-	var date = Ti.UI.createLabel({
-		color:'#999',
-		font:{fontSize:13,fontWeight:'normal', fontFamily:'Arial'},
-		left:105,
-		bottom:5,
-		height:20,
-		width:100,
-		text:'posted on 3/11'
-	});
-	date.addEventListener('click', function(e)
-	{
-		// use rowNum property on object to get row number
-		var rowNum = e.source.rowNum;
-		updateRowText.text = 'You clicked on the date text';
-
-		// TODO: FIX UPDATE ROW
-		//tableView.updateRow(rowNum,updateRow,{animationStyle:Titanium.UI.iPhone.RowAnimationStyle.LEFT});
-	});
-
-	date.rowNum = c;
-	row.add(date);
 
     data.push(row);
 }
@@ -257,7 +236,7 @@ tableView.addEventListener('click', function(e)
 
 })
 
-
+//init();
 win1.add(tableView);
 
 win1.setRightNavButton(refresh);
@@ -306,8 +285,29 @@ Titanium.Geolocation.getCurrentPosition(
   }
 );
 
+ // Make Network Request
+try {
+	Titanium.API.debug("Trying to open network connection");
+	var xhr = Titanium.Network.createHTTPClient();
+	xhr.open('GET','http://openottawa.org/api/fsi/nearby.php');
+
+	xhr.onload = function() {
+        //do work on "this.responseXML"
+		Titanium.API.debug("Success - got "+ this.responseText);
+	 	alert(this.responseText);
+
+    };
+}
+catch(err) {
+    Titanium.UI.createAlertDialog({
+        title: "Error",
+        message: String(err),
+        buttonNames: ['OK']
+    }).show();
+}
+
+
 
 
 // open tab group
 tabGroup.open();
-
