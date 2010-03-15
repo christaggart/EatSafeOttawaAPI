@@ -1,0 +1,142 @@
+// !$*UTF8*$!
+{
+	1D6058900D05DD3D006BFB54 /* EatSafeOttawa */ = {
+		activeExec = 0;
+		executables = (
+			832A520B114DB0310066996B /* EatSafeOttawa */,
+		);
+	};
+	2418F31D0FCB095700BFE545 /* ApplicationRouting.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1349, 577}}";
+			sepNavSelRange = "{333, 0}";
+			sepNavVisRange = "{0, 333}";
+		};
+	};
+	2418F31E0FCB095700BFE545 /* ApplicationRouting.m */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {63761, 577}}";
+			sepNavSelRange = "{313, 0}";
+			sepNavVisRange = "{0, 9801}";
+		};
+	};
+	29B97313FDCFA39411CA2CEA /* Project object */ = {
+		activeBuildConfigurationName = Debug;
+		activeExecutable = 832A520B114DB0310066996B /* EatSafeOttawa */;
+		activeTarget = 1D6058900D05DD3D006BFB54 /* EatSafeOttawa */;
+		codeSenseManager = 832A528E114DB04E0066996B /* Code sense */;
+		executables = (
+			832A520B114DB0310066996B /* EatSafeOttawa */,
+		);
+		perUserDictionary = {
+			PBXConfiguration.PBXFileTableDataSource3.PBXFileTableDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					1171,
+					20,
+					48.16259765625,
+					43,
+					43,
+					20,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+					PBXFileDataSource_Target_ColumnID,
+				);
+			};
+			PBXPerProjectTemplateStateSaveDate = 290304050;
+			PBXWorkspaceStateSaveDate = 290304050;
+		};
+		perUserProjectItems = {
+			832A5287114DB04E0066996B /* PBXTextBookmark */ = 832A5287114DB04E0066996B /* PBXTextBookmark */;
+			832A528F114DB0620066996B /* PBXBookmark */ = 832A528F114DB0620066996B /* PBXBookmark */;
+			832A5290114DB0620066996B /* PBXTextBookmark */ = 832A5290114DB0620066996B /* PBXTextBookmark */;
+			832A5291114DB0620066996B /* PBXTextBookmark */ = 832A5291114DB0620066996B /* PBXTextBookmark */;
+		};
+		sourceControlManager = 832A528D114DB04E0066996B /* Source Control */;
+		userBuildSettings = {
+		};
+	};
+	832A520B114DB0310066996B /* EatSafeOttawa */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 0;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		dataTipCustomDataFormattersEnabled = 1;
+		dataTipShowTypeColumn = 1;
+		dataTipSortType = 0;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = EatSafeOttawa;
+		showTypeColumn = 0;
+		sourceDirectories = (
+		);
+	};
+	832A5287114DB04E0066996B /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 2418F31D0FCB095700BFE545 /* ApplicationRouting.h */;
+		name = "ApplicationRouting.h: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 333;
+		vrLoc = 0;
+	};
+	832A528D114DB04E0066996B /* Source Control */ = {
+		isa = PBXSourceControlManager;
+		fallbackIsa = XCSourceControlManager;
+		isSCMEnabled = 0;
+		scmConfiguration = {
+			repositoryNamesForRoots = {
+				"" = "";
+			};
+		};
+	};
+	832A528E114DB04E0066996B /* Code sense */ = {
+		isa = PBXCodeSenseManager;
+		indexTemplatePath = "";
+	};
+	832A528F114DB0620066996B /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = B4EA83650FBCA52B005AA7FB /* Default.png */;
+	};
+	832A5290114DB0620066996B /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 2418F31E0FCB095700BFE545 /* ApplicationRouting.m */;
+		name = "ApplicationRouting.m: 10";
+		rLen = 0;
+		rLoc = 313;
+		rType = 0;
+		vrLen = 9801;
+		vrLoc = 0;
+	};
+	832A5291114DB0620066996B /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 2418F31D0FCB095700BFE545 /* ApplicationRouting.h */;
+		name = "ApplicationRouting.h: 14";
+		rLen = 0;
+		rLoc = 333;
+		rType = 0;
+		vrLen = 333;
+		vrLoc = 0;
+	};
+}
