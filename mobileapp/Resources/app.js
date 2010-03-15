@@ -25,7 +25,7 @@ var refresh = Titanium.UI.createButton({
 refresh.addEventListener('click', function()
 {
 	Titanium.UI.createAlertDialog({title:'Blah', message:'REFRESH'}).show();
-	Titanium.API.debug("refresh stuff");
+	Titanium.API.debug("refresh location + nearby");
 });
 
 win1.barColor = '#385292';
@@ -56,13 +56,13 @@ var data = [];
 
 // create first row
 var row = Ti.UI.createTableViewRow();
-row.backgroundColor = '#576996';
+row.backgroundColor = '#979797';
 row.selectedBackgroundColor = '#385292';
 row.height = 40;
 var clickLabel = Titanium.UI.createLabel({
-	text:'Click different parts of the row',
+	text:'Nearby',
 	color:'#fff',
-	textAlign:'center',
+	textAlign:'left',
 	font:{fontSize:14},
 	width:'auto',
 	height:'auto'
@@ -72,10 +72,7 @@ row.add(clickLabel);
 data.push(row);
 
 // when you click the header, scroll to the bottom
-row.addEventListener('click',function()
-{
-	tableView.scrollToIndex(40,{animated:true,position:Ti.UI.iPhone.TableViewScrollPosition.TOP})
-});
+
 
 // create update row (used when the user clicks on the row)
 var updateRow = Ti.UI.createTableViewRow();
@@ -135,7 +132,7 @@ for (var c=1;c<50;c++)
 		top:2,
 		height:30,
 		width:200,
-		text:'Fred Smith '+c
+		text:'1 FOR '+c+' PIZZA '
 	});
 	user.addEventListener('click', function(e)
 	{
@@ -158,7 +155,7 @@ for (var c=1;c<50;c++)
 		top:21,
 		height:50,
 		width:200,
-		text:'Got some fresh fruit, conducted some business, took a nap'
+		text:'1234 Bank St.'
 	});
 	comment.addEventListener('click', function(e)
 	{
