@@ -6,8 +6,8 @@ import math
 import time
 
 XML_URL = "http://ottawa.ca/cgi-bin/search/inspections/q.pl?ss=details_en&sq_fs_fdid="
-DB_USER = "root"
-DB_PASSWORD = "D2p4yd5_"
+DB_USER = "fsi"
+DB_PASSWORD = "fsi"
 DB_DATABASE = "fsi"
 DB_HOST = "localhost"
 
