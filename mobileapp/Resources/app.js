@@ -311,4 +311,3 @@ catch(err) {
 
 // open tab group
 tabGroup.open();
-//test change
