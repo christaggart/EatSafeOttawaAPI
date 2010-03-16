@@ -1,6 +1,87 @@
+// Include JSON parser
+Titanium.include('json2.js');
+
+//Include app header
+//Titanium.include('header.js');
+
+//Construct main content views
+//Titanium.include('json2.js'); // Creates a 'chooser' view we manipulate in the main app
+
 // this sets the background color of the master UIView (when there are no windows/tab groups on it)
 Titanium.UI.setBackgroundColor('#000');
 
+
+var actInd = Titanium.UI.createActivityIndicator({
+	top:10,
+	height:50,
+	width:10,
+	color:'#000000',
+	style:Titanium.UI.iPhone.ActivityIndicatorStyle.DARK
+});
+
+
+function displayResults(result) {
+
+}
+
+function getResults(term, nearby) {
+	actInd.show();
+	try {
+		var xhr = Titanium.Network.createHTTPClient();
+
+		if (nearby == true) {
+			Titanium.API.debug("GETTING NEARBY");
+
+			Titanium.Geolocation.getCurrentPosition(
+			  function(pos) {
+			    // what to do if getCurrentPosition was successful
+			    // `pos` will be the object shown above in "Returns"
+				nearbyUrl = 'http://openottawa.org/api/fsi/nearby.php?lat='+pos.coords.latitude+"&lon="+pos.coords.longitude;
+				Titanium.API.debug(nearbyUrl);
+				xhr.open('GET', nearbyUrl);
+				xhr.send();
+				Titanium.API.debug("Got coords - " + pos.coords.latitude + ", " + pos.coords.longitude);
+			  },
+			  function() {
+			    // what to do if getCurrentPosition failed
+				alert("Couldn't get location - do plain search instead");
+			  }
+			);
+
+		} else {
+			xhr.open('GET','http://openottawa.org/api/fsi/all.php');
+			Titanium.API.debug("getting ALL");
+		}
+
+		xhr.onload = function() {
+	        //do work on "this.responseXML"
+			Titanium.API.debug("Success - got "+ this.responseText);
+
+			// parse data back into magic
+			//responseData = JSON.parse(text, function (key, value) {
+			//   var type;
+			//    if (value && typeof value === 'object') {
+			//        type = value.type;
+			//        if (typeof type === 'string' && typeof window[type] === 'function') {
+			//            return new (window[type])(value);
+			//        }
+			//    }
+			//    return value;
+			//});
+			actInd.hide();
+	    };
+
+	}
+	catch(err) {
+	    Titanium.UI.createAlertDialog({
+	        title: "Error",
+	        message: String(err),
+	        buttonNames: ['OK']
+	    }).show();
+		actInd.message = null;
+		actInd.hide();
+	}
+}
 
 // create tab group
 var tabGroup = Titanium.UI.createTabGroup();
@@ -24,17 +105,17 @@ var refresh = Titanium.UI.createButton({
 
 refresh.addEventListener('click', function()
 {
-	Titanium.UI.createAlertDialog({title:'Blah', message:'REFRESH'}).show();
+	getResults(search.value, true)
 	Titanium.API.debug("refresh location + nearby");
 });
 
-win1.barColor = '#385292';
+win1.barColor = '#0071ce';
 
 //
 // CREATE SEARCH BAR
 //
 var search = Titanium.UI.createSearchBar({
-	barColor:'#385292',
+	barColor:'#0071ce',
 	showCancel:false
 });
 search.addEventListener('change', function(e)
@@ -44,6 +125,7 @@ search.addEventListener('change', function(e)
 
 search.addEventListener('return', function(e)
 {
+   getResults(e.value, false);
    search.blur();
 });
 search.addEventListener('cancel', function(e)
@@ -52,89 +134,38 @@ search.addEventListener('cancel', function(e)
 });
 
 var tableView;
-var data = [];
-
-// create first row
-var row = Ti.UI.createTableViewRow();
-row.backgroundColor = '#979797';
-row.selectedBackgroundColor = '#385292';
-row.height = 40;
-var clickLabel = Titanium.UI.createLabel({
-	text:'Nearby',
-	color:'#fff',
-	textAlign:'left',
-	font:{fontSize:14},
-	width:'auto',
-	height:'auto'
-});
-row.className = 'header';
-row.add(clickLabel);
-data.push(row);
-
-// when you click the header, scroll to the bottom
+var data = [
+	{title:'1 FOR 1 PIZZA', hasDetail:true, id:'123', address:'1415 Bank St.', city:'Ottawa',phone:'613-555-1212'},
+	{title:'Royal Thai', hasDetail:true, id:'456', address:'1415 Bank St.', city:'Ottawa',phone:'613-555-1212'},
+	{title:'Sante Restaurant', hasDetail:true, id:'789', address:'1415 Bank St.', city:'Ottawa',phone:'613-555-1212'},
+	{title:'Royal Oak', hasDetail:true, id:'101112', address:'1415 Bank St.', city:'Ottawa',phone:'613-555-1212'}
+];
 
 
-// create update row (used when the user clicks on the row)
-var updateRow = Ti.UI.createTableViewRow();
-updateRow.backgroundColor = '#13386c';
-updateRow.selectedBackgroundColor = '#13386c';
 
-// add custom property to identify this row
-updateRow.isUpdateRow = true;
-var updateRowText = Ti.UI.createLabel({
-	color:'#fff',
-	font:{fontSize:20, fontWeight:'bold'},
-	text:'You clicked on...',
-	width:'auto',
-	height:'auto'
-});
-updateRow.add(updateRowText);
 
-// create a var to track the active row
-var currentRow = null;
-var currentRowIndex = null;
 
+/*
 // create the rest of the rows
 for (var c=1;c<50;c++)
 {
 	var row = Ti.UI.createTableViewRow();
 	row.selectedBackgroundColor = '#fff';
-	row.height  =100;
+	row.height = 50;
 	row.className = 'datarow';
 
 
-	var photo = Ti.UI.createView({
-		backgroundImage:'../images/custom_tableview/user.png',
-		top:5,
-		left:10,
-		width:50,
-		height:50
-	});
-	photo.addEventListener('click', function(e)
-	{
-		Ti.API.info('photo click ' + e.source.rowNum + ' new row ' + updateRow);
-
-		// use rowNum property on object to get row number
-		var rowNum = e.source.rowNum;
-		updateRowText.text = 'You clicked on the photo';
-		//TODO: FIX UPDATE ROW
-		//tableView.updateRow(rowNum,updateRow,{animationStyle:Titanium.UI.iPhone.RowAnimationStyle.LEFT});
-
-	});
-	photo.rowNum = c;
-	row.add(photo);
-
-
 	var user = Ti.UI.createLabel({
-		color:'#576996',
-		font:{fontSize:16,fontWeight:'bold', fontFamily:'Arial'},
-		left:70,
-		top:2,
-		height:30,
+		color:'#000',
+		font:{fontSize:16,fontWeight:'bold', fontFamily:'Helvetica Neue'},
+		left:10,
+		top:5,
+		height:20,
 		width:200,
 		text:'1 FOR '+c+' PIZZA '
 	});
-	user.addEventListener('click', function(e)
+
+	row.addEventListener('click', function(e)
 	{
 		// use rowNum property on object to get row number
 		var rowNum = e.source.rowNum;
@@ -148,16 +179,17 @@ for (var c=1;c<50;c++)
 	user.rowNum = c;
 	row.add(user);
 
-	var comment = Ti.UI.createLabel({
+	var address = Ti.UI.createLabel({
 		color:'#222',
-		font:{fontSize:16,fontWeight:'normal', fontFamily:'Arial'},
-		left:70,
-		top:21,
-		height:50,
+		font:{fontSize:14,fontWeight:'normal', fontFamily:'Arial'},
+		left:10,
+		top:22,
+		height:20,
 		width:200,
 		text:'1234 Bank St.'
 	});
-	comment.addEventListener('click', function(e)
+
+	address.addEventListener('click', function(e)
 	{
 		// use rowNum property on object to get row number
 		var rowNum = e.source.rowNum;
@@ -167,54 +199,12 @@ for (var c=1;c<50;c++)
 		//tableView.updateRow(rowNum,updateRow,{animationStyle:Titanium.UI.iPhone.RowAnimationStyle.LEFT});
 	});
 
-	comment.rowNum = c;
-	row.add(comment);
-
-	var calendar = Ti.UI.createView({
-		backgroundImage:'../images/custom_tableview/eventsButton.png',
-		bottom:2,
-		left:70,
-		width:32,
-		height:32
-	});
-	calendar.addEventListener('click', function(e)
-	{
-		// use rowNum property on object to get row number
-		var rowNum = e.source.rowNum;
-		updateRowText.text = 'You clicked on the calendar';
-
-		// TODO: FIX UPDATE ROW
-		//tableView.updateRow(rowNum,updateRow,{animationStyle:Titanium.UI.iPhone.RowAnimationStyle.LEFT});
-	});
-
-	calendar.rowNum = c;
-	row.add(calendar);
-
-	var button = Ti.UI.createView({
-		backgroundImage:'../images/custom_tableview/commentButton.png',
-		top:35,
-		right:5,
-		width:36,
-		height:34
-	});
-	button.addEventListener('click', function(e)
-	{
-		// use rowNum property on object to get row number
-		var rowNum = e.source.rowNum;
-		updateRowText.text = 'You clicked on the comment button';
-
-		// TODO: FIX UPDATE ROW
-		//tableView.updateRow(rowNum,updateRow,{animationStyle:Titanium.UI.iPhone.RowAnimationStyle.LEFT});
-	});
-
-	button.rowNum = c;
-	row.add(button);
-
-
+	address.rowNum = c;
+	row.add(address);
     data.push(row);
 }
 
-
+*/
 //
 // create table view (
 //
@@ -224,21 +214,72 @@ tableView = Titanium.UI.createTableView({
 	filterAttribute:'filter'
 });
 
+
+
+// create table view event listener
 tableView.addEventListener('click', function(e)
 {
-	if (currentRow != null && e.row.isUpdateRow == false)
-	{
-		//TODO: FIX UPDATE ROW
-		//tableView.updateRow(currentRowIndex, currentRow, {animationStyle:Titanium.UI.iPhone.RowAnimationStyle.RIGHT});
-	}
-	currentRow = e.row;
-	currentRowIndex = e.index;
+	// event data
+	var index = e.index;
+	var section = e.section;
+	var row = e.row;
+	var rowdata = e.rowData;
 
-})
+	// custom property
+	var id = e.rowData.id;
+	var address = e.rowData.address;
+	var city = e.rowData.city;
+	var phone = e.rowData.phone;
+
+	//
+		// create window with right nav button
+		//
+		var detail = Titanium.UI.createWindow({
+			backgroundColor:'#13386c',
+			barColor:'#336699',
+			translucent:true,
+		});
+
+		var detailview = Titanium.UI.createView({backgroundColor:'yellow'});
+
+		// Restaurant Label
+		var detailTitle = Ti.UI.createLabel({
+		color:'#000',
+		font:{fontSize:16,fontWeight:'bold', fontFamily:'Helvetica Neue'},
+		left:10,
+		top:5,
+		height:20,
+		width:200,
+		text:e.rowData.title
+		});
+
+		//Details
+		var detailAddress = Ti.UI.createLabel({
+			color:'#222',
+			font:{fontSize:14,fontWeight:'normal', fontFamily:'Arial'},
+			left:10,
+			top:22,
+			height:20,
+			width:200,
+			text:address
+		});
+		detailview.add(detailTitle);
+		detailview.add(detailAddress);
+
+		//List report details
+
+		detail.add(detailview);
+		actInd.show();
+		tab1.open(detail,{animated:true});
+		actInd.hide();
+
+	Titanium.UI.createAlertDialog({title:'Table View',message:'custom value ' + id}).show();
+});
+
 
 //init();
+win1.add(actInd);
 win1.add(tableView);
-
 win1.setRightNavButton(refresh);
 
 
@@ -272,42 +313,16 @@ tabGroup.addTab(tab1);
 tabGroup.addTab(tab2);
 
 
-Titanium.Geolocation.getCurrentPosition(
-  function(pos) {
-    // what to do if getCurrentPosition was successful
-    // `pos` will be the object shown above in "Returns"
-
-	Titanium.API.debug(pos.coords.latitude + ", " + pos.coords.longitude);
-  },
-  function() {
-    // what to do if getCurrentPosition failed
-	Titanium.API.debug("Couldn't get location");
-  }
-);
-
- // Make Network Request
-try {
-	Titanium.API.debug("Trying to open network connection");
-	var xhr = Titanium.Network.createHTTPClient();
-	xhr.open('GET','http://openottawa.org/api/fsi/nearby.php');
-
-	xhr.onload = function() {
-        //do work on "this.responseXML"
-		Titanium.API.debug("Success - got "+ this.responseText);
-	 	alert(this.responseText);
-
-    };
-}
-catch(err) {
-    Titanium.UI.createAlertDialog({
-        title: "Error",
-        message: String(err),
-        buttonNames: ['OK']
-    }).show();
-}
-
-
-
-
 // open tab group
 tabGroup.open();
+
+if (!Titanium.Network.online) {
+  var a = Titanium.UI.createAlertDialog({
+    title:'Network Connection Required',
+    message: 'EatSafeOttawa requires an internet connection to, you know, get stuff from the internet.  Check your network connection and try again.'
+  });
+	a.show();
+}
+// Fetch initial results
+getResults('pizza',true);
+
