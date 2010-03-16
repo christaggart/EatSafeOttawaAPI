@@ -217,8 +217,9 @@ for (var c=1;c<50;c++)
 
 var currentRow = null;
 var currentRowIndex = null;
+var i=0;
 
-for (var i=0;i<info.length;i++)
+for (i=0;i<info.length;i++)
 {
     //Titanium.UI.createAlertDialog({title:'TEST',message:'Test Message.'}).show();
     var row = Ti.UI.createTableViewRow({hasDetail:true});
@@ -328,7 +329,7 @@ for (var i=0;i<info.length;i++)
 		var detail = Titanium.UI.createWindow({
 			backgroundColor:'#13386c',
 			barColor:'#336699',
-			translucent:true
+			translucent:false
 		});
 
         // create table view data object
@@ -337,7 +338,9 @@ for (var i=0;i<info.length;i++)
 
         for (var c=0;c<1;c++)
         {
-            dedata[c] = Ti.UI.createTableViewSection({headerTitle:info[i].title + ', ' + info[i].address});
+
+            dedata[c] = Ti.UI.createTableViewSection({headerTitle:details[0].title + ', ' + details[0].address});
+       
             for (var x=0;x<details.length;x++)
             {
                 var label = Ti.UI.createLabel({
@@ -346,15 +349,17 @@ for (var i=0;i<info.length;i++)
                     width:'auto',
                     left:10
                 });
+                     
                 var row = Ti.UI.createTableViewRow({height:'auto'});
                 row.add(label);
-                row.add(rightButton);
                 dedata[c].add(row);
+                
                 row.addEventListener('click',function(e)
                 {
                     Ti.API.info("row click on row. index = "+e.index+", row = "+e.row+", section = "+e.section+", source="+e.source);
                 });
             }
+            
             dedata[c].addEventListener('click',function(e)
             {
                 Ti.API.info("row click on section. index = "+e.index+", row = "+e.row+", section = "+e.section+", source="+e.source);
