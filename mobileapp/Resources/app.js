@@ -49,7 +49,7 @@ function getResults(term, nearby) {
 			);
 
 		} else {
-			xhr.open('GET','http://openottawa.org/api/fsi/all.php');
+			xhr.open('GET','http://openottawa.org/api/fsi/nearby.php');
 			Titanium.API.debug("getting ALL");
 		}
 
@@ -103,11 +103,7 @@ var refresh = Titanium.UI.createButton({
 	systemButton:Titanium.UI.iPhone.SystemButton.REFRESH
 });
 
-refresh.addEventListener('click', function()
-{
-	getResults(search.value, true)
-	Titanium.API.debug("refresh location + nearby");
-});
+
 
 win1.barColor = '#0071ce';
 
@@ -118,6 +114,13 @@ var search = Titanium.UI.createSearchBar({
 	barColor:'#0071ce',
 	showCancel:false
 });
+
+refresh.addEventListener('click', function()
+{
+	getResults('pizza', true);
+	Titanium.API.debug("refresh location + nearby");
+});
+
 search.addEventListener('change', function(e)
 {
    e.value // search string as user types
@@ -211,7 +214,7 @@ for (var c=1;c<50;c++)
 tableView = Titanium.UI.createTableView({
 	data:data,
 	search:search,
-	filterAttribute:'filter'
+	filterAttribute:'title'
 });
 
 
@@ -237,43 +240,46 @@ tableView.addEventListener('click', function(e)
 		var detail = Titanium.UI.createWindow({
 			backgroundColor:'#13386c',
 			barColor:'#336699',
-			translucent:true,
+			translucent:true
 		});
 
-		var detailview = Titanium.UI.createView({backgroundColor:'yellow'});
+		var detailview = Titanium.UI.createView({backgroundColor:'#000'});
 
 		// Restaurant Label
-		var detailTitle = Ti.UI.createLabel({
-		color:'#000',
-		font:{fontSize:16,fontWeight:'bold', fontFamily:'Helvetica Neue'},
+		var detailTitle = Titanium.UI.createLabel({
+		color:'#fff',
+		font:{fontSize:16,fontWeight:'bold', fontFamily:'Helvetica'},
 		left:10,
 		top:5,
 		height:20,
 		width:200,
-		text:e.rowData.title
+		text:'TITLE'
 		});
 
 		//Details
-		var detailAddress = Ti.UI.createLabel({
-			color:'#222',
-			font:{fontSize:14,fontWeight:'normal', fontFamily:'Arial'},
+		var detailAddress = Titanium.UI.createLabel({
+			color:'#fff',
+			font:{fontSize:14,fontWeight:'normal', fontFamily:'Helvetica'},
 			left:10,
 			top:22,
 			height:20,
 			width:200,
-			text:address
+			text:'Address Field'
 		});
-		detailview.add(detailTitle);
-		detailview.add(detailAddress);
 
-		//List report details
+		var curWin = Titanium.UI.currentWindow;
 
 		detail.add(detailview);
-		actInd.show();
-		tab1.open(detail,{animated:true});
-		actInd.hide();
 
-	Titanium.UI.createAlertDialog({title:'Table View',message:'custom value ' + id}).show();
+
+		//actInd.show();
+		tab1.open(detail,{animated:true});
+		detail.add(detailTitle);
+		detail.add(detailAddress);
+		alert("phone is "+ phone);
+		//actInd.hide();
+
+	//Titanium.UI.createAlertDialog({title:'Table View',message:'custom value ' + id}).show();
 });
 
 
