@@ -238,8 +238,8 @@ tableView.addEventListener('click', function(e)
 		// create window with right nav button
 		//
 		var detail = Titanium.UI.createWindow({
-			backgroundColor:'#13386c',
-			barColor:'#336699',
+			backgroundColor:'#0071ce',
+			barColor:'#0071ce',
 			translucent:true
 		});
 
@@ -250,21 +250,21 @@ tableView.addEventListener('click', function(e)
 		color:'#fff',
 		font:{fontSize:16,fontWeight:'bold', fontFamily:'Helvetica'},
 		left:10,
-		top:5,
+		top:50,
 		height:20,
 		width:200,
-		text:'TITLE'
+		text:e.rowData.title
 		});
 
 		//Details
 		var detailAddress = Titanium.UI.createLabel({
 			color:'#fff',
-			font:{fontSize:14,fontWeight:'normal', fontFamily:'Helvetica'},
+			font:{fontSize:12,fontWeight:'normal', fontFamily:'Helvetica'},
 			left:10,
-			top:22,
-			height:20,
+			top:70,
+			height:30,
 			width:200,
-			text:'Address Field'
+			text:address + "\n" + phone
 		});
 
 		var curWin = Titanium.UI.currentWindow;
@@ -276,7 +276,6 @@ tableView.addEventListener('click', function(e)
 		tab1.open(detail,{animated:true});
 		detail.add(detailTitle);
 		detail.add(detailAddress);
-		alert("phone is "+ phone);
 		//actInd.hide();
 
 	//Titanium.UI.createAlertDialog({title:'Table View',message:'custom value ' + id}).show();
