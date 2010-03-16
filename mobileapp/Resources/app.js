@@ -137,11 +137,16 @@ search.addEventListener('cancel', function(e)
 });
 
 var tableView;
-var data = [
+var data = [];
+var info = [
 	{title:'1 FOR 1 PIZZA', hasDetail:true, id:'123', address:'1415 Bank St.', city:'Ottawa',phone:'613-555-1212'},
 	{title:'Royal Thai', hasDetail:true, id:'456', address:'1415 Bank St.', city:'Ottawa',phone:'613-555-1212'},
 	{title:'Sante Restaurant', hasDetail:true, id:'789', address:'1415 Bank St.', city:'Ottawa',phone:'613-555-1212'},
 	{title:'Royal Oak', hasDetail:true, id:'101112', address:'1415 Bank St.', city:'Ottawa',phone:'613-555-1212'}
+];
+var details = [
+    {title:'1 FOR 1 PIZZA', address:'1415 Bank St. ', compliance:"NO", date:'2010-01-01', report:'This is a report detail.'},
+    {title:'1 FOR 1 PIZZA', address:'1415 Bank St. ', compliance:"YES", date:'2010-02-15', report:'This is another report detail.'}
 ];
 
 
@@ -208,33 +213,71 @@ for (var c=1;c<50;c++)
 }
 
 */
-//
-// create table view (
-//
-tableView = Titanium.UI.createTableView({
-	data:data,
-	search:search,
-	filterAttribute:'title'
-});
 
 
+var currentRow = null;
+var currentRowIndex = null;
 
-// create table view event listener
-tableView.addEventListener('click', function(e)
+for (var i=0;i<info.length;i++)
 {
-	// event data
-	var index = e.index;
-	var section = e.section;
-	var row = e.row;
-	var rowdata = e.rowData;
+    //Titanium.UI.createAlertDialog({title:'TEST',message:'Test Message.'}).show();
+    var row = Ti.UI.createTableViewRow({hasDetail:true});
+    //row.selectedBackgroundColor = '#fff';
+	row.height = 80;
+	row.className = 'datarow';
 
-	// custom property
-	var id = e.rowData.id;
-	var address = e.rowData.address;
-	var city = e.rowData.city;
-	var phone = e.rowData.phone;
+	var title = Ti.UI.createLabel({
+		color:'#576996',
+		font:{fontSize:24,fontWeight:'bold', fontFamily:'Helvetica Neue'},
+		left:10,
+		top:5,
+		height:20,
+		width:200,
+		text:info[i].title
+	});
+    title.addEventListener('click', function(e)
+    {
+        var rowNum = e.source.rowNum;
+    });
 
-	//
+    row.filter = title.text;
+    title.rowNum = i+1;
+    
+    row.add(title);
+    
+    var address = Ti.UI.createLabel({
+        color:'#222',
+		font:{fontSize:14,fontWeight:'normal', fontFamily:'Arial'},
+		left:10,
+		top:22,
+		height:20,
+		width:200,
+		text:info[i].address
+	});
+    address.addEventListener('click', function(e)
+    {
+        var rowNum = e.source.rowNum;
+    });
+    row.add(address);
+    
+    
+
+    // create table view row event listener
+    row.addEventListener('click', function(e)
+    {
+        // event data
+        //var index = e.index;
+        //var section = e.section;
+        //var row = e.row;
+        //var rowdata = e.rowData;
+
+/*        // custom property
+        //var id = e.rowData.id;
+        //var address = e.rowData.address;
+        //var city = e.rowData.city;
+        //var phone = e.rowData.phone;
+
+        //
 		// create window with right nav button
 		//
 		var detail = Titanium.UI.createWindow({
@@ -243,45 +286,143 @@ tableView.addEventListener('click', function(e)
 			translucent:true
 		});
 
-		var detailview = Titanium.UI.createView({backgroundColor:'#000'});
+		var detailview = Titanium.UI.createView({backgroundColor:'#fff'});
 
 		// Restaurant Label
 		var detailTitle = Titanium.UI.createLabel({
-		color:'#fff',
-		font:{fontSize:16,fontWeight:'bold', fontFamily:'Helvetica'},
-		left:10,
-		top:5,
-		height:20,
-		width:200,
-		text:'TITLE'
+            color:'#000',
+            font:{fontSize:16,fontWeight:'bold', fontFamily:'Helvetica'},
+            left:10,
+            top:5,
+            height:20,
+            width:200,
+            text:'TITLE'
+        });
+
+        //Details
+        var detailAddress = Titanium.UI.createLabel({
+            color:'#000',
+            font:{fontSize:14,fontWeight:'normal', fontFamily:'Helvetica'},
+            left:10,
+            top:22,
+            height:20,
+            width:200,
+            text:'Address Field'
+        });
+
+        var curWin = Titanium.UI.currentWindow;
+
+        detail.add(detailview);
+
+
+        //actInd.show();
+        tab1.open(detail,{animated:true});
+        detail.add(detailTitle);
+        detail.add(detailAddress);
+        alert("phone is "+ phone);
+        //actInd.hide();
+
+        //Titanium.UI.createAlertDialog({title:'Detail View',message:'Address: ' + data[i].title}).show();
+*/
+
+		var detail = Titanium.UI.createWindow({
+			backgroundColor:'#13386c',
+			barColor:'#336699',
+			translucent:true
 		});
 
-		//Details
-		var detailAddress = Titanium.UI.createLabel({
-			color:'#fff',
-			font:{fontSize:14,fontWeight:'normal', fontFamily:'Helvetica'},
-			left:10,
-			top:22,
-			height:20,
-			width:200,
-			text:'Address Field'
-		});
-
-		var curWin = Titanium.UI.currentWindow;
-
-		detail.add(detailview);
+        // create table view data object
+        var dedata = [];
 
 
-		//actInd.show();
-		tab1.open(detail,{animated:true});
-		detail.add(detailTitle);
-		detail.add(detailAddress);
-		alert("phone is "+ phone);
-		//actInd.hide();
+        for (var c=0;c<1;c++)
+        {
+            dedata[c] = Ti.UI.createTableViewSection({headerTitle:info[i].title + ', ' + info[i].address});
+            for (var x=0;x<details.length;x++)
+            {
+                var label = Ti.UI.createLabel({
+                    text:'Date: ' + details[x].date + "\n" + details[x].report,
+                    height:'auto',
+                    width:'auto',
+                    left:10
+                });
+                var row = Ti.UI.createTableViewRow({height:'auto'});
+                row.add(label);
+                row.add(rightButton);
+                dedata[c].add(row);
+                row.addEventListener('click',function(e)
+                {
+                    Ti.API.info("row click on row. index = "+e.index+", row = "+e.row+", section = "+e.section+", source="+e.source);
+                });
+            }
+            dedata[c].addEventListener('click',function(e)
+            {
+                Ti.API.info("row click on section. index = "+e.index+", row = "+e.row+", section = "+e.section+", source="+e.source);
+            });
+        }
 
-	//Titanium.UI.createAlertDialog({title:'Table View',message:'custom value ' + id}).show();
+        // create table view
+        var detailview = Titanium.UI.createTableView({
+            data:dedata,
+            style: Titanium.UI.iPhone.TableViewStyle.GROUPED,
+            //rowHeight:80,
+            minRowHeight:80
+            //maxRowHeight:500,
+        });
+
+        // create table view event listener
+        detailview.addEventListener('click', function(e)
+        {
+            // event data
+            var index = e.index;
+            var section = e.section;
+            var row = e.row;
+            var rowdata = e.rowData;
+            Titanium.UI.createAlertDialog({title:'Table View',message:'row ' + row + ' index ' + index + ' section ' + section  + ' row data ' + rowdata}).show();
+        });
+
+
+        // add table view to the window
+        //Titanium.UI.currentWindow.add(tableview);
+
+        var curWin = Titanium.UI.currentWindow;
+
+        detail.add(detailview);
+
+
+        //actInd.show();
+        tab1.open(detail,{animated:true});
+
+
+//
+    });
+    
+    data.push(row);
+    
+}
+
+
+//
+// create table view (
+//
+tableView = Titanium.UI.createTableView({
+	data:data,
+	search:search,
+	filterAttribute:'filter'
 });
 
+tableView.addEventListener('click', function(e)
+{
+	if (currentRow != null && e.row.isUpdateRow == false)
+	{
+		//TODO: FIX UPDATE ROW
+	//tableView.updateRow(currentRowIndex, currentRow,
+    // {animationStyle:Titanium.UI.iPhone.RowAnimationStyle.RIGHT});
+	}
+	currentRow = e.row;
+	currentRowIndex = e.index;
+	
+});
 
 //init();
 win1.add(actInd);
