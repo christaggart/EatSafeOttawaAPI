@@ -224,12 +224,12 @@ for (i=0;i<info.length;i++)
     //Titanium.UI.createAlertDialog({title:'TEST',message:'Test Message.'}).show();
     var row = Ti.UI.createTableViewRow({hasDetail:true});
     //row.selectedBackgroundColor = '#fff';
-	row.height = 80;
+	row.height = 48;
 	row.className = 'datarow';
 
 	var title = Ti.UI.createLabel({
-		color:'#576996',
-		font:{fontSize:24,fontWeight:'bold', fontFamily:'Helvetica Neue'},
+		color:'#000',
+		font:{fontSize:22,fontWeight:'bold', fontFamily:'Helvetica Neue'},
 		left:10,
 		top:5,
 		height:20,
@@ -243,14 +243,14 @@ for (i=0;i<info.length;i++)
 
     row.filter = title.text;
     title.rowNum = i+1;
-    
+
     row.add(title);
-    
+
     var address = Ti.UI.createLabel({
         color:'#222',
 		font:{fontSize:14,fontWeight:'normal', fontFamily:'Arial'},
 		left:10,
-		top:22,
+		top:24,
 		height:20,
 		width:200,
 		text:info[i].address
@@ -260,8 +260,8 @@ for (i=0;i<info.length;i++)
         var rowNum = e.source.rowNum;
     });
     row.add(address);
-    
-    
+
+
 
     // create table view row event listener
     row.addEventListener('click', function(e)
@@ -327,8 +327,8 @@ for (i=0;i<info.length;i++)
 */
 
 		var detail = Titanium.UI.createWindow({
-			backgroundColor:'#13386c',
-			barColor:'#336699',
+			backgroundColor:'#0071ce',
+			barColor:'#0071ce',
 			translucent:false
 		});
 
@@ -340,7 +340,7 @@ for (i=0;i<info.length;i++)
         {
 
             dedata[c] = Ti.UI.createTableViewSection({headerTitle:details[0].title + ', ' + details[0].address});
-       
+
             for (var x=0;x<details.length;x++)
             {
                 var label = Ti.UI.createLabel({
@@ -349,17 +349,17 @@ for (i=0;i<info.length;i++)
                     width:'auto',
                     left:10
                 });
-                     
+
                 var row = Ti.UI.createTableViewRow({height:'auto'});
                 row.add(label);
                 dedata[c].add(row);
-                
+
                 row.addEventListener('click',function(e)
                 {
                     Ti.API.info("row click on row. index = "+e.index+", row = "+e.row+", section = "+e.section+", source="+e.source);
                 });
             }
-            
+
             dedata[c].addEventListener('click',function(e)
             {
                 Ti.API.info("row click on section. index = "+e.index+", row = "+e.row+", section = "+e.section+", source="+e.source);
@@ -401,9 +401,9 @@ for (i=0;i<info.length;i++)
 
 //
     });
-    
+
     data.push(row);
-    
+
 }
 
 
@@ -426,7 +426,7 @@ tableView.addEventListener('click', function(e)
 	}
 	currentRow = e.row;
 	currentRowIndex = e.index;
-	
+
 });
 
 //init();
