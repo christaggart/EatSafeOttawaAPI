@@ -24,7 +24,7 @@ function displayResults(result) {
 
 }
 
-function getResults(term, nearby) {
+function getResults(term, nearby) {  // term = "search term", nearby == boolean NEARBY or ALL
 	actInd.show();
 	try {
 		var xhr = Titanium.Network.createHTTPClient();
@@ -405,6 +405,7 @@ for (i=0;i<info.length;i++)
     data.push(row);
 
 }
+
 
 
 //
