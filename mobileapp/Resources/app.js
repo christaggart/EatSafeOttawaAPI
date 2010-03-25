@@ -1,3 +1,5 @@
+
+
 // Include JSON parser
 Titanium.include('json2.js');
 
@@ -10,22 +12,232 @@ Titanium.include('json2.js');
 // this sets the background color of the master UIView (when there are no windows/tab groups on it)
 Titanium.UI.setBackgroundColor('#000');
 
+var lat = 0;
+var lon = 0;
+var results = [];
+var tableView;
+var data = [];
 
+var info = [
+       {id:'B789A388-ED35-490D-A68F-518EA3893A88', title:'1 FOR 1 PIZZA', hasDetail:true, id:'123', address:'1415 Bank St.', city:'Ottawa',phone:'613-555-1212'},
+       {id:'B789A388-ED35-490D-A68F-518EA3893A88', title:'Royal Thai', hasDetail:true, id:'456', address:'1415 Bank St.', city:'Ottawa',phone:'613-555-1212'},
+       {id:'B789A388-ED35-490D-A68F-518EA3893A88', title:'Sante Restaurant', hasDetail:true, id:'789', address:'1415 Bank St.', city:'Ottawa',phone:'613-555-1212'},
+       {id:'B789A388-ED35-490D-A68F-518EA3893A88', title:'Royal Oak', hasDetail:true, id:'101112', address:'1415 Bank St.', city:'Ottawa',phone:'613-555-1212'}
+];
+
+function getDetailView(id) {
+
+}
+
+
+function populateTable(info) {
+       // This loads items into the list, dataset is the API JSON result.
+       data = []; // default list value
+       var currentRow = null;
+       var currentRowIndex = null;
+       var i=0;
+
+       for (i=0;i<info.length;i++)
+       {
+           var row = Ti.UI.createTableViewRow({hasDetail:true});
+               row.height = 48;
+               row.className = 'datarow';
+
+               var title = Ti.UI.createLabel({
+                       color:'#000',font:{fontSize:18,fontWeight:'bold', fontFamily:'Helvetica Neue'}, left:10,top:5,  height:20,      width:200,text:info[i].name
+                       });
+           title.addEventListener('click', function(e)
+           {
+               var rowNum = e.source.rowNum;
+           });
+
+           row.filter = title.text;
+           title.rowNum = i+1;
+
+           row.add(title);
+
+           var address = Ti.UI.createLabel({
+               color:'#222',
+                       font:{fontSize:14,fontWeight:'normal', fontFamily:'Arial'},
+                       left:10,
+                       top:24,
+                       height:20,
+                       width:200,
+                       text:info[i].street_number + " " + info[i].street_name
+               });
+           address.addEventListener('click', function(e)
+           {
+               var rowNum = e.source.rowNum;
+           });
+           row.add(address);
+
+
+
+           // create table view row event listener
+           row.addEventListener('click', function(e)
+           {
+                       alert('clicked on a row sucka');
+                       Titanium.API.debug("getting details for " + info[i].id);
+                       // Show Loading Indicator
+                       //getDetails(e.rowData.id);
+           });
+
+           data.push(row);
+
+       }
+
+       tableView = Titanium.UI.createTableView({
+               data:data,
+               search:search,
+               filterAttribute:'filter'
+       });
+
+       tableView.addEventListener('click', function(e)
+       {
+               if (currentRow != null && e.row.isUpdateRow == false)
+               {
+                       //TODO: FIX UPDATE ROW
+               //tableView.updateRow(currentRowIndex, currentRow,
+           // {animationStyle:Titanium.UI.iPhone.RowAnimationStyle.RIGHT});
+               }
+               currentRow = e.row;
+               currentRowIndex = e.index;
+
+       });
+
+       win1.add(tableView);
+}
+
+
+function getLocation() {
+       Titanium.Geolocation.getCurrentPosition(
+         function(pos) {
+           // what to do if getCurrentPosition was successful
+           // `pos` will be the object shown above in "Returns"
+               lat = pos.coords.latitude;
+               lon = pos.coords.longitude;
+               Titanium.API.debug("Got coords - " + pos.coords.latitude + ", " + pos.coords.longitude);
+               getResults('');
+               //alert("Got location: "+lat +", "+lon)
+         },
+         function() {
+           // what to do if getCurrentPosition failed
+               alert("Couldn't get location - do plain search instead?");
+         }
+       );
+
+}
+
+
+/*
 var actInd = Titanium.UI.createActivityIndicator({
-	top:10,
-	height:50,
-	width:10,
-	color:'#000000',
-	style:Titanium.UI.iPhone.ActivityIndicatorStyle.DARK
-});
+	//color:'#000000',
+	style:Titanium.UI.iPhone.ActivityIndicatorStyle.PLAIN,
+    font:{fontFamily:'Helvetica Neue', fontSize:15,fontWeight:'bold'},
+	color:'red',
+	message:'Loading...'
 
+});
+*/
+
+//
+//  CREATE CUSTOM LOADING INDICATOR
+//
+var indWin = null;
+var actInd = null;
+
+function showIndicator()
+{
+	// window container
+	indWin = Titanium.UI.createWindow({
+		height:150,
+		width:150
+	});
+	
+	// black view
+	var indView = Titanium.UI.createView({
+		height:150,
+		width:150,
+		backgroundColor:'#000',
+		borderRadius:10,
+		opacity:0.8
+	});
+	indWin.add(indView);
+	
+	// loading indicator
+	actInd = Titanium.UI.createActivityIndicator({
+		style:Titanium.UI.iPhone.ActivityIndicatorStyle.BIG,
+		height:30,
+		width:30
+	});
+	indWin.add(actInd);
+	
+	// message
+	var message = Titanium.UI.createLabel({
+		text:'Loading',
+		color:'#fff',
+		width:'auto',
+		height:'auto',
+		font:{fontSize:20,fontWeight:'bold'},
+		bottom:20
+	});
+	indWin.add(message);
+	indWin.open();
+    tableView.opacity = 0.5;
+    tableView.touchEnable = false;
+    tableView.hide();
+	actInd.show();
+	
+};
+
+function hideIndicator()
+{
+	tableView.opacity = 1.0;
+    tableView.touchEnable = true;
+    tableView.show();
+    actInd.hide();
+	indWin.close({opacity:0,duration:500});
+};
+
+function getResults(term) {  // term = "search term"
+    Titanium.API.debug("call to getResults");
+    showIndicator();
+    try {
+        if (!xhr) {
+            var xhr = Titanium.Network.createHTTPClient();
+        }
+        nearbyUrl = 'http://openottawa.org/api/fsi/nearby.php?q='+term+'&lat='+lat+"&lon="+lon;
+        xhr.open('GET',nearbyUrl);
+        Titanium.API.debug("getting results - " + nearbyUrl);
+
+        xhr.onload = function() {
+            results = JSON.parse(this.responseText);
+            populateTable(results);
+        };
+        xhr.send();
+    }
+    
+    catch(err) {
+        Titanium.UI.createAlertDialog({
+            title: "Error",
+            message: String(err),
+            buttonNames: ['OK']
+        }).show();
+        hideIndicator();
+    }
+    hideIndicator();
+}
 
 function displayResults(result) {
 
 }
 
+/*
 function getResults(term, nearby) {  // term = "search term", nearby == boolean NEARBY or ALL
-	actInd.show();
+	//12
+    //win1.setToolbar([actInd],{animated:true});
+    //actInd.show();
+    showIndicator();
 	try {
 		var xhr = Titanium.Network.createHTTPClient();
 
@@ -68,7 +280,9 @@ function getResults(term, nearby) {  // term = "search term", nearby == boolean 
 			//    }
 			//    return value;
 			//});
-			actInd.hide();
+			//actInd.hide();
+            //win1.setToolbar(null,{animated:true});
+            hideIndicator();
 	    };
 
 	}
@@ -78,10 +292,13 @@ function getResults(term, nearby) {  // term = "search term", nearby == boolean 
 	        message: String(err),
 	        buttonNames: ['OK']
 	    }).show();
-		actInd.message = null;
-		actInd.hide();
+		//actInd.message = null;
+		//actInd.hide();
+        //win1.setToolbar(null,{animated:true});
+        hideIndicator();
 	}
 }
+*/
 
 // create tab group
 var tabGroup = Titanium.UI.createTabGroup();
@@ -91,12 +308,25 @@ var tabGroup = Titanium.UI.createTabGroup();
 //
 var win1 = Titanium.UI.createWindow({
     title:'Eat Safe Ottawa',
-    backgroundColor:'#fff'
+    backgroundColor:'#fff',
+    barColor:'#000'
 });
+
+
+// current window
+var curWin = Titanium.UI.currentWindow;
+//Titanium.UI.createAlertDialog({title:'TEST',message:win1.name}).show();
+
 var tab1 = Titanium.UI.createTab({
     icon:'KS_nav_views.png',
     title:'Places',
     window:win1
+});
+
+tab1.addEventListener('touchstart', function(e)
+{
+    //tableView.animate();
+    Titanium.UI.createAlertDialog({title:'TEST',message:'tab1 touchstart eventlistener.'}).show();
 });
 
 var refresh = Titanium.UI.createButton({
@@ -105,20 +335,24 @@ var refresh = Titanium.UI.createButton({
 
 
 
-win1.barColor = '#0071ce';
+//win1.barColor = '#0071ce';
 
 //
 // CREATE SEARCH BAR
 //
 var search = Titanium.UI.createSearchBar({
-	barColor:'#0071ce',
+	barColor:'#000',
 	showCancel:false
 });
 
 refresh.addEventListener('click', function()
 {
-	getResults('pizza', true);
 	Titanium.API.debug("refresh location + nearby");
+    tableView.setData([]);
+    setTimeout(function()
+    {
+        getResults();
+    },100);
 });
 
 search.addEventListener('change', function(e)
@@ -138,12 +372,14 @@ search.addEventListener('cancel', function(e)
 
 var tableView;
 var data = [];
+/*
 var info = [
 	{title:'1 FOR 1 PIZZA', hasDetail:true, id:'123', address:'1415 Bank St.', city:'Ottawa',phone:'613-555-1212'},
 	{title:'Royal Thai', hasDetail:true, id:'456', address:'1415 Bank St.', city:'Ottawa',phone:'613-555-1212'},
 	{title:'Sante Restaurant', hasDetail:true, id:'789', address:'1415 Bank St.', city:'Ottawa',phone:'613-555-1212'},
 	{title:'Royal Oak', hasDetail:true, id:'101112', address:'1415 Bank St.', city:'Ottawa',phone:'613-555-1212'}
 ];
+*/
 var details = [
     {title:'1 FOR 1 PIZZA', address:'1415 Bank St. ', compliance:"NO", date:'2010-01-01', report:'This is a report detail.'},
     {title:'1 FOR 1 PIZZA', address:'1415 Bank St. ', compliance:"YES", date:'2010-02-15', report:'This is another report detail.'}
@@ -151,74 +387,11 @@ var details = [
 
 
 
-
-
-/*
-// create the rest of the rows
-for (var c=1;c<50;c++)
-{
-	var row = Ti.UI.createTableViewRow();
-	row.selectedBackgroundColor = '#fff';
-	row.height = 50;
-	row.className = 'datarow';
-
-
-	var user = Ti.UI.createLabel({
-		color:'#000',
-		font:{fontSize:16,fontWeight:'bold', fontFamily:'Helvetica Neue'},
-		left:10,
-		top:5,
-		height:20,
-		width:200,
-		text:'1 FOR '+c+' PIZZA '
-	});
-
-	row.addEventListener('click', function(e)
-	{
-		// use rowNum property on object to get row number
-		var rowNum = e.source.rowNum;
-		updateRowText.text = 'You clicked on the user';
-		// TODO: FIX UPDATE ROW
-		//tableView.updateRow(rowNum,updateRow,{animationStyle:Titanium.UI.iPhone.RowAnimationStyle.LEFT});
-	});
-
-	row.filter = user.text;
-
-	user.rowNum = c;
-	row.add(user);
-
-	var address = Ti.UI.createLabel({
-		color:'#222',
-		font:{fontSize:14,fontWeight:'normal', fontFamily:'Arial'},
-		left:10,
-		top:22,
-		height:20,
-		width:200,
-		text:'1234 Bank St.'
-	});
-
-	address.addEventListener('click', function(e)
-	{
-		// use rowNum property on object to get row number
-		var rowNum = e.source.rowNum;
-		updateRowText.text = 'You clicked on the comment';
-
-		// TODO: FIX UPDATE ROW
-		//tableView.updateRow(rowNum,updateRow,{animationStyle:Titanium.UI.iPhone.RowAnimationStyle.LEFT});
-	});
-
-	address.rowNum = c;
-	row.add(address);
-    data.push(row);
-}
-
-*/
-
-
 var currentRow = null;
 var currentRowIndex = null;
 var i=0;
 
+/*
 for (i=0;i<info.length;i++)
 {
     //Titanium.UI.createAlertDialog({title:'TEST',message:'Test Message.'}).show();
@@ -261,74 +434,24 @@ for (i=0;i<info.length;i++)
     });
     row.add(address);
 
+    row.addEventListener('touchstart', function(e)
+    {
+        //tableView.animate();
+        Titanium.UI.createAlertDialog({title:'TEST',message:'row touchstart eventlistener.'}).show();
+    });
 
+    row.addEventListener('touchstart', function(e)
+    {
+        Titanium.UI.createAlertDialog({title:'TEST',message:'row touchstart eventlistener.'}).show();
+    });
 
     // create table view row event listener
     row.addEventListener('click', function(e)
     {
-        // event data
-        //var index = e.index;
-        //var section = e.section;
-        //var row = e.row;
-        //var rowdata = e.rowData;
-
-/*        // custom property
-        //var id = e.rowData.id;
-        //var address = e.rowData.address;
-        //var city = e.rowData.city;
-        //var phone = e.rowData.phone;
-
-        //
-		// create window with right nav button
-		//
-		var detail = Titanium.UI.createWindow({
-			backgroundColor:'#0071ce',
-			barColor:'#0071ce',
-			translucent:true
-		});
-
-		var detailview = Titanium.UI.createView({backgroundColor:'#fff'});
-
-		// Restaurant Label
-		var detailTitle = Titanium.UI.createLabel({
-            color:'#000',
-            font:{fontSize:16,fontWeight:'bold', fontFamily:'Helvetica'},
-            left:10,
-            top:5,
-            height:20,
-            width:200,
-            text:'TITLE'
-        });
-
-        //Details
-        var detailAddress = Titanium.UI.createLabel({
-            color:'#000',
-            font:{fontSize:14,fontWeight:'normal', fontFamily:'Helvetica'},
-            left:10,
-            top:22,
-            height:20,
-            width:200,
-            text:'Address Field'
-        });
-
-        var curWin = Titanium.UI.currentWindow;
-
-        detail.add(detailview);
-
-
-        //actInd.show();
-        tab1.open(detail,{animated:true});
-        detail.add(detailTitle);
-        detail.add(detailAddress);
-        alert("phone is "+ phone);
-        //actInd.hide();
-
-        //Titanium.UI.createAlertDialog({title:'Detail View',message:'Address: ' + data[i].title}).show();
-*/
 
 		var detail = Titanium.UI.createWindow({
 			backgroundColor:'#0071ce',
-			barColor:'#0071ce',
+			barColor:'#000',
 			translucent:false
 		});
 
@@ -339,7 +462,7 @@ for (i=0;i<info.length;i++)
         for (var c=0;c<1;c++)
         {
 
-            dedata[c] = Ti.UI.createTableViewSection({headerTitle:details[0].title + ', ' + details[0].address});
+            dedata[c] = Ti.UI.createTableViewSection({headerTitle:details[0].title + ", " + details[0].address});
 
             for (var x=0;x<details.length;x++)
             {
@@ -390,7 +513,7 @@ for (i=0;i<info.length;i++)
         // add table view to the window
         //Titanium.UI.currentWindow.add(tableview);
 
-        var curWin = Titanium.UI.currentWindow;
+        //var curWin = Titanium.UI.currentWindow;
 
         detail.add(detailview);
 
@@ -405,7 +528,7 @@ for (i=0;i<info.length;i++)
     data.push(row);
 
 }
-
+*/
 
 
 //
@@ -414,8 +537,11 @@ for (i=0;i<info.length;i++)
 tableView = Titanium.UI.createTableView({
 	data:data,
 	search:search,
-	filterAttribute:'filter'
+	filterAttribute:'filter',
+    moving:false
 });
+
+
 
 tableView.addEventListener('click', function(e)
 {
@@ -430,10 +556,22 @@ tableView.addEventListener('click', function(e)
 
 });
 
+
 //init();
-win1.add(actInd);
+//win1.add(actInd);
+//tableView.add(actInd);
 win1.add(tableView);
 win1.setRightNavButton(refresh);
+
+win1.addEventListener('touchstart', function(e)
+{
+    Titanium.UI.createAlertDialog({title:'TEST',message:'win1 touchstart eventlistener.'}).show();
+});
+
+tableView.addEventListener('touchstart', function(e)
+{
+    Titanium.UI.createAlertDialog({title:'TEST',message:'tableview touchstart eventlistener.'}).show();
+});
 
 
 //
@@ -457,7 +595,31 @@ var label2 = Titanium.UI.createLabel({
 
 win2.add(label2);
 
+win2.addEventListener('touchstart', function(e)
+{
+    Titanium.UI.createAlertDialog({title:'TEST',message:'win2 touchstart eventlistener.'}).show();
+});
 
+/*
+win2.addEventListener('touchmove', function(e)
+{
+    Titanium.UI.createAlertDialog({title:'TEST',message:'win2 touchmove eventlistener.'}).show();
+});
+
+win2.addEventListener('touchend', function(e)
+{
+    Titanium.UI.createAlertDialog({title:'TEST',message:'win2 touchend eventlistener.'}).show();
+});
+win2.addEventListener('singletap', function(e)
+{
+    Titanium.UI.createAlertDialog({title:'TEST',message:'win2 singletap eventlistener.'}).show();
+});*/
+
+/*curView.addEventListener('touchstart', function(e)
+{
+    //tableView.animate();
+    Titanium.UI.createAlertDialog({title:'TEST',message:'win touchstart eventlistener.'}).show();
+});*/
 
 //
 //  add tabs
@@ -477,5 +639,19 @@ if (!Titanium.Network.online) {
 	a.show();
 }
 // Fetch initial results
+//setTimeout(getResults('pizza',true), 100);
+
+    //win1.setToolbar([actInd],{animated:true});
+    //actInd.show();
+    //setTimeout(getResults('pizza',true),2000);
+     
 getResults('pizza',true);
 
+
+// response
+/*
+var response = JSON.parse(this.responseText);
+                       for(var x=0; x < response.length; x++) {
+                               alert(response[x].name);
+                       }
+*/
