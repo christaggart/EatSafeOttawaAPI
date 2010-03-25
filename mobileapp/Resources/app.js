@@ -10,8 +10,8 @@ Titanium.include('json2.js');
 //Titanium.include('json2.js'); // Creates a 'chooser' view we manipulate in the main app
 
 // this sets the background color of the master UIView (when there are no windows/tab groups on it)
-Titanium.UI.setBackgroundColor('#000');
-
+Titanium.UI.setBackgroundColor('#eee');
+var isLoaded = 0;
 var lat = 0;
 var lon = 0;
 var results = [];
@@ -25,6 +25,86 @@ var info = [
        {id:'B789A388-ED35-490D-A68F-518EA3893A88', title:'Royal Oak', hasDetail:true, id:'101112', address:'1415 Bank St.', city:'Ottawa',phone:'613-555-1212'}
 ];
 
+
+
+//
+//  CREATE CUSTOM LOADING INDICATOR
+//
+var indWin = null;
+var actInd = null;
+
+function showIndicator()
+{
+	Ti.API.debug("calling show indicator");
+	// window container
+
+
+	indWin = Titanium.UI.createWindow({
+		modal:true,
+		height:150,
+		width:150
+	});
+
+	// black view
+	var indView = Titanium.UI.createView({
+		height:150,
+		width:150,
+		backgroundColor:'#000',
+		borderRadius:10,
+		opacity:0.8
+	});
+	indWin.add(indView);
+
+	// loading indicator
+	actInd = Titanium.UI.createActivityIndicator({
+		style:Titanium.UI.iPhone.ActivityIndicatorStyle.BIG,
+		height:30,
+		width:30
+	});
+	indWin.add(actInd);
+
+	// message
+	var message = Titanium.UI.createLabel({
+		text:'loading',
+		color:'#fff',
+		width:'auto',
+		height:'auto',
+		font:{fontSize:20,fontWeight:'bold'},
+		bottom:20
+	});
+	indWin.add(message);
+
+
+
+	indWin.open();
+	Ti.API.debug(indWin.modal);
+	indView.show();
+	indWin.show();
+	actInd.show();
+	Ti.API.debug(indWin.opacity);
+	Ti.API.debug(indView.visible);
+	Ti.API.debug(indView.opacity);
+	//if (tableView) {
+    // 	tableView.opacity = 0.5;
+    //	tableView.touchEnable = false;
+    //	tableView.hide();
+	//}
+	actInd.show();
+
+};
+
+function hideIndicator()
+{
+	Ti.API.debug("calling hide INdicator");
+	//if (tableView) {
+	//	tableView.opacity = 1.0;
+    //	tableView.touchEnable = true;
+    //	tableView.show();
+	//}
+    actInd.hide();
+	indWin.close({opacity:0,duration:500});
+};
+
 function getDetailView(id) {
 
 }
@@ -33,6 +113,7 @@ function getDetailView(id) {
 function populateTable(info) {
        // This loads items into the list, dataset is the API JSON result.
        data = []; // default list value
+
        var currentRow = null;
        var currentRowIndex = null;
        var i=0;
@@ -89,6 +170,7 @@ function populateTable(info) {
        tableView = Titanium.UI.createTableView({
                data:data,
                search:search,
+               visible:false,
                filterAttribute:'filter'
        });
 
@@ -106,10 +188,14 @@ function populateTable(info) {
        });
 
        win1.add(tableView);
+	hideIndicator();
+	win1.show();
+	tableView.show();
 }
 
 
 function getLocation() {
+
        Titanium.Geolocation.getCurrentPosition(
          function(pos) {
            // what to do if getCurrentPosition was successful
@@ -118,6 +204,7 @@ function getLocation() {
                lon = pos.coords.longitude;
                Titanium.API.debug("Got coords - " + pos.coords.latitude + ", " + pos.coords.longitude);
                getResults('');
+
                //alert("Got location: "+lat +", "+lon)
          },
          function() {
@@ -140,68 +227,9 @@ var actInd = Titanium.UI.createActivityIndicator({
 });
 */
 
-//
-//  CREATE CUSTOM LOADING INDICATOR
-//
-var indWin = null;
-var actInd = null;
-
-function showIndicator()
-{
-	// window container
-	indWin = Titanium.UI.createWindow({
-		height:150,
-		width:150
-	});
-	
-	// black view
-	var indView = Titanium.UI.createView({
-		height:150,
-		width:150,
-		backgroundColor:'#000',
-		borderRadius:10,
-		opacity:0.8
-	});
-	indWin.add(indView);
-	
-	// loading indicator
-	actInd = Titanium.UI.createActivityIndicator({
-		style:Titanium.UI.iPhone.ActivityIndicatorStyle.BIG,
-		height:30,
-		width:30
-	});
-	indWin.add(actInd);
-	
-	// message
-	var message = Titanium.UI.createLabel({
-		text:'Loading',
-		color:'#fff',
-		width:'auto',
-		height:'auto',
-		font:{fontSize:20,fontWeight:'bold'},
-		bottom:20
-	});
-	indWin.add(message);
-	indWin.open();
-    tableView.opacity = 0.5;
-    tableView.touchEnable = false;
-    tableView.hide();
-	actInd.show();
-	
-};
-
-function hideIndicator()
-{
-	tableView.opacity = 1.0;
-    tableView.touchEnable = true;
-    tableView.show();
-    actInd.hide();
-	indWin.close({opacity:0,duration:500});
-};
-
 function getResults(term) {  // term = "search term"
-    Titanium.API.debug("call to getResults");
-    showIndicator();
+    Ti.API.debug("call to getResults");
+ 	showIndicator();
     try {
         if (!xhr) {
             var xhr = Titanium.Network.createHTTPClient();
@@ -216,89 +244,17 @@ function getResults(term) {  // term = "search term"
         };
         xhr.send();
     }
-    
+
     catch(err) {
         Titanium.UI.createAlertDialog({
             title: "Error",
             message: String(err),
             buttonNames: ['OK']
         }).show();
-        hideIndicator();
-    }
     hideIndicator();
-}
-
-function displayResults(result) {
+    }
 
 }
-
-/*
-function getResults(term, nearby) {  // term = "search term", nearby == boolean NEARBY or ALL
-	//12
-    //win1.setToolbar([actInd],{animated:true});
-    //actInd.show();
-    showIndicator();
-	try {
-		var xhr = Titanium.Network.createHTTPClient();
-
-		if (nearby == true) {
-			Titanium.API.debug("GETTING NEARBY");
-
-			Titanium.Geolocation.getCurrentPosition(
-			  function(pos) {
-			    // what to do if getCurrentPosition was successful
-			    // `pos` will be the object shown above in "Returns"
-				nearbyUrl = 'http://openottawa.org/api/fsi/nearby.php?lat='+pos.coords.latitude+"&lon="+pos.coords.longitude;
-				Titanium.API.debug(nearbyUrl);
-				xhr.open('GET', nearbyUrl);
-				xhr.send();
-				Titanium.API.debug("Got coords - " + pos.coords.latitude + ", " + pos.coords.longitude);
-			  },
-			  function() {
-			    // what to do if getCurrentPosition failed
-				alert("Couldn't get location - do plain search instead");
-			  }
-			);
-
-		} else {
-			xhr.open('GET','http://openottawa.org/api/fsi/nearby.php');
-			Titanium.API.debug("getting ALL");
-		}
-
-		xhr.onload = function() {
-	        //do work on "this.responseXML"
-			Titanium.API.debug("Success - got "+ this.responseText);
-
-			// parse data back into magic
-			//responseData = JSON.parse(text, function (key, value) {
-			//   var type;
-			//    if (value && typeof value === 'object') {
-			//        type = value.type;
-			//        if (typeof type === 'string' && typeof window[type] === 'function') {
-			//            return new (window[type])(value);
-			//        }
-			//    }
-			//    return value;
-			//});
-			//actInd.hide();
-            //win1.setToolbar(null,{animated:true});
-            hideIndicator();
-	    };
-
-	}
-	catch(err) {
-	    Titanium.UI.createAlertDialog({
-	        title: "Error",
-	        message: String(err),
-	        buttonNames: ['OK']
-	    }).show();
-		//actInd.message = null;
-		//actInd.hide();
-        //win1.setToolbar(null,{animated:true});
-        hideIndicator();
-	}
-}
-*/
 
 // create tab group
 var tabGroup = Titanium.UI.createTabGroup();
@@ -309,6 +265,7 @@ var tabGroup = Titanium.UI.createTabGroup();
 var win1 = Titanium.UI.createWindow({
     title:'Eat Safe Ottawa',
     backgroundColor:'#fff',
+	visible:false,
     barColor:'#000'
 });
 
@@ -348,6 +305,7 @@ var search = Titanium.UI.createSearchBar({
 refresh.addEventListener('click', function()
 {
 	Titanium.API.debug("refresh location + nearby");
+	tableView.hide();
     tableView.setData([]);
     setTimeout(function()
     {
@@ -370,8 +328,7 @@ search.addEventListener('cancel', function(e)
    search.blur();
 });
 
-var tableView;
-var data = [];
+
 /*
 var info = [
 	{title:'1 FOR 1 PIZZA', hasDetail:true, id:'123', address:'1415 Bank St.', city:'Ottawa',phone:'613-555-1212'},
@@ -538,7 +495,8 @@ tableView = Titanium.UI.createTableView({
 	data:data,
 	search:search,
 	filterAttribute:'filter',
-    moving:false
+    moving:false,
+	visible:false
 });
 
 
@@ -560,7 +518,8 @@ tableView.addEventListener('click', function(e)
 //init();
 //win1.add(actInd);
 //tableView.add(actInd);
-win1.add(tableView);
+//win1.add(tableView);
+
 win1.setRightNavButton(refresh);
 
 win1.addEventListener('touchstart', function(e)
@@ -631,6 +590,8 @@ tabGroup.addTab(tab2);
 // open tab group
 tabGroup.open();
 
+
+
 if (!Titanium.Network.online) {
   var a = Titanium.UI.createAlertDialog({
     title:'Network Connection Required',
@@ -643,9 +604,9 @@ if (!Titanium.Network.online) {
 
     //win1.setToolbar([actInd],{animated:true});
     //actInd.show();
-    //setTimeout(getResults('pizza',true),2000);
-     
-getResults('pizza',true);
+    //setTimeout(getResults(''),1000);
+//showIndicator();
+getResults('');
 
 
 // response
