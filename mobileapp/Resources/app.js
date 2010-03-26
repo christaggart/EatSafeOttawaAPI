@@ -157,10 +157,103 @@ function populateTable(info) {
            // create table view row event listener
            row.addEventListener('click', function(e)
            {
-                       alert('clicked on a row sucka');
+			   	    showIndicator();
+					 try {
+					        if (!xhr) {
+					            var xhr = Titanium.Network.createHTTPClient();
+					        }
+					        detailsUrl = 'http://openottawa.org/api/fsi/details.php';
+					        xhr.open('GET',nearbyUrl);
+					        Titanium.API.debug("getting results - " + detailsUrl);
+
+					        xhr.onload = function() {
+					            results = JSON.parse(this.responseText);
+					            var detail = Titanium.UI.createWindow({
+									backgroundColor:'#0071ce',
+									barColor:'#000',
+									translucent:false
+								});
+
+						        // create table view data object
+						        var dedata = [];
+
+
+						        for (var c=0;c<1;c++)
+						        {
+
+						            dedata[c] = Ti.UI.createTableViewSection({headerTitle:details[0].title + ", " + details[0].address});
+
+						            for (var x=0;x<details.length;x++)
+						            {
+						                var label = Ti.UI.createLabel({
+						                    text:'Date: ' + details[x].date + "\n" + details[x].report,
+						                    height:'auto',
+						                    width:'auto',
+						                    left:10
+						                });
+
+						                var row = Ti.UI.createTableViewRow({height:'auto'});
+						                row.add(label);
+						                dedata[c].add(row);
+
+						                row.addEventListener('click',function(e)
+						                {
+						                    Ti.API.info("row click on row. index = "+e.index+", row = "+e.row+", section = "+e.section+", source="+e.source);
+						                });
+						            }
+
+						            dedata[c].addEventListener('click',function(e)
+						            {
+						                Ti.API.info("row click on section. index = "+e.index+", row = "+e.row+", section = "+e.section+", source="+e.source);
+						            });
+						        }
+
+						        // create table view
+						        var detailview = Titanium.UI.createTableView({
+						            data:dedata,
+						            style: Titanium.UI.iPhone.TableViewStyle.GROUPED,
+						            //rowHeight:80,
+						            minRowHeight:80
+						            //maxRowHeight:500,
+						        });
+
+						        // create table view event listener
+						        detailview.addEventListener('click', function(e)
+						        {
+						            // event data
+						            var index = e.index;
+						            var section = e.section;
+						            var row = e.row;
+						            var rowdata = e.rowData;
+						            Titanium.UI.createAlertDialog({title:'Table View',message:'row ' + row + ' index ' + index + ' section ' + section  + ' row data ' + rowdata}).show();
+						        });
+
+
+						        // add table view to the window
+						        //Titanium.UI.currentWindow.add(tableview);
+
+						        //var curWin = Titanium.UI.currentWindow;
+
+						        detail.add(detailview);
+
+
+						        //actInd.show();
+						        tab1.open(detail,{animated:true});
+					            hideIndicator();
+					        };
+					        xhr.send();
+					    }
+
+					    catch(err) {
+					        Titanium.UI.createAlertDialog({
+					            title: "Error",
+					            message: String(err),
+					            buttonNames: ['OK']
+					        }).show();
+					    hideIndicator();
+					    }
                        Titanium.API.debug("getting details for " + info[i].id);
-                       // Show Loading Indicator
-                       //getDetails(e.rowData.id);
+                       //getDetailView(e.rowData.id);
            });
 
            data.push(row);
