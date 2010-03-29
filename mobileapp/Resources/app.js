@@ -186,13 +186,17 @@ function populateTable(info) {
 						            for (var x=0;x<details.length;x++)
 						            {
 						                var label = Ti.UI.createLabel({
-						                    text:'Date: ' + details[x].date + "\n" + details[x].report,
+											color: '#fff',
+											backgroundColor: '#000',
+						                    text:' Inspection            ' + details[x].date, // + "\n" + details[x].report[0].category,
 						                    height:'auto',
 						                    width:'auto',
 						                    left:10
 						                });
 
-						                var row = Ti.UI.createTableViewRow({height:'auto'});
+						                var row = Ti.UI.createTableViewRow({height:'auto',
+										backgroundColor:'#000',
+										color:'#FFF',});
 						                row.add(label);
 						                dedata[c].add(row);
 
@@ -206,27 +210,29 @@ function populateTable(info) {
 						            {
 						                Ti.API.info("row click on section. index = "+e.index+", row = "+e.row+", section = "+e.section+", source="+e.source);
 						            });
+
+									    // create table view
+								        var detailview = Titanium.UI.createTableView({
+								            data:dedata,
+								            style: Titanium.UI.iPhone.TableViewStyle.GROUPED,
+								            //rowHeight:80,
+								            minRowHeight:30
+								            //maxRowHeight:500,
+								        });
+
+								        // create table view event listener
+								        detailview.addEventListener('click', function(e)
+								        {
+								            // event data
+								            var index = e.index;
+								            var section = e.section;
+								            var row = e.row;
+								            var rowdata = e.rowData;
+								            Titanium.UI.createAlertDialog({title:'Table View',message:'row ' + row + ' index ' + index + ' section ' + section  + ' row data ' + rowdata}).show();
+								        });
+
 						        }
 
-						        // create table view
-						        var detailview = Titanium.UI.createTableView({
-						            data:dedata,
-						            style: Titanium.UI.iPhone.TableViewStyle.GROUPED,
-						            //rowHeight:80,
-						            minRowHeight:80
-						            //maxRowHeight:500,
-						        });
-
-						        // create table view event listener
-						        detailview.addEventListener('click', function(e)
-						        {
-						            // event data
-						            var index = e.index;
-						            var section = e.section;
-						            var row = e.row;
-						            var rowdata = e.rowData;
-						            Titanium.UI.createAlertDialog({title:'Table View',message:'row ' + row + ' index ' + index + ' section ' + section  + ' row data ' + rowdata}).show();
-						        });
 
 
 						        // add table view to the window
@@ -431,8 +437,8 @@ var info = [
 ];
 */
 var details = [
-    {title:'1 FOR 1 PIZZA', address:'1415 Bank St. ', compliance:"NO", date:'2010-01-01', report:'This is a report detail.'},
-    {title:'1 FOR 1 PIZZA', address:'1415 Bank St. ', compliance:"YES", date:'2010-02-15', report:'This is another report detail.'}
+    {title:'1 FOR 1 PIZZA', address:'1415 Bank St. ', compliance:"NO", date:'2010-01-01', report:[]},
+    {title:'1 FOR 1 PIZZA', address:'1415 Bank St. ', compliance:"YES", date:'2010-02-15', desc_en:'This premise was found to be in compliance with the Ontario Food Premises Regulation.'}
 ];
 
 
