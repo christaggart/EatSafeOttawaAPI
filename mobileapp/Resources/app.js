@@ -26,6 +26,9 @@ var info = [
 ];
 
 
+function startup() {
+    getResults('');
+};
 
 //
 //  CREATE CUSTOM LOADING INDICATOR
@@ -120,17 +123,17 @@ function populateTable(info) {
 
        for (i=0;i<info.length;i++)
        {
-           var row = Ti.UI.createTableViewRow({hasDetail:true});
+            var row = Ti.UI.createTableViewRow({hasDetail:true});
                row.height = 48;
                row.className = 'datarow';
 
-               var title = Ti.UI.createLabel({
+            var title = Ti.UI.createLabel({
                        color:'#000',font:{fontSize:18,fontWeight:'bold', fontFamily:'Helvetica Neue'}, left:10,top:5,  height:20,      width:200,text:info[i].name
-                       });
-           title.addEventListener('click', function(e)
-           {
+            });
+            title.addEventListener('click', function(e)
+            {
                var rowNum = e.source.rowNum;
-           });
+            });
 
            row.filter = title.text;
            title.rowNum = i+1;
@@ -163,62 +166,155 @@ function populateTable(info) {
 					            var xhr = Titanium.Network.createHTTPClient();
 					        }
 					        detailsUrl = 'http://openottawa.org/api/fsi/details.php';
-					        xhr.open('GET',nearbyUrl);
+					        xhr.open('GET',detailsUrl);
 					        Titanium.API.debug("getting results - " + detailsUrl);
 
 					        xhr.onload = function() {
 					            results = JSON.parse(this.responseText);
 					            var detail = Titanium.UI.createWindow({
-									backgroundColor:'#0071ce',
+									backgroundColor:'#fff',
 									barColor:'#000',
-									translucent:false
+									translucent:false,
+                                    backgroundColor:'#E0E0E0'
 								});
+                                
+                                var nameLabel = Ti.UI.createLabel({
+                                    color: '#000',
+                                    //backgroundColor: '#000',
+                                    text:results[0].name,
+                                    font:{fontSize:18,fontWeight:'bold', fontFamily:'Helvetica Neue'},
+                                    height:'auto',
+                                    width:'auto',
+                                    left:10,
+                                    top:5
+                                });
+                                detail.add(nameLabel);
+                                var addressLabel = Ti.UI.createLabel({
+                                    color:'#222',
+                                    font:{fontSize:14,fontWeight:'normal', fontFamily:'Arial'},
+                                    text:results[0].street_number + ' ' + results[0].street_name,
+                                    height:'auto',
+                                    width:'auto',
+                                    left:10,
+                                    top:25
+                                });
+                                detail.add(addressLabel);
 
 						        // create table view data object
 						        var dedata = [];
+                                 Ti.API.debug(results);
 
-
-						        for (var c=0;c<1;c++)
+                                Ti.API.debug(results[0].inspections.length);
+						        for (var c=0;c<results[0].inspections.length;c++)
 						        {
 
-						            dedata[c] = Ti.UI.createTableViewSection({headerTitle:details[0].title + ", " + details[0].address});
+                                    dedata[c] = Ti.UI.createTableViewSection();
 
-						            for (var x=0;x<details.length;x++)
-						            {
-						                var label = Ti.UI.createLabel({
-											color: '#fff',
-											backgroundColor: '#000',
-						                    text:' Inspection            ' + details[x].date, // + "\n" + details[x].report[0].category,
-						                    height:'auto',
-						                    width:'auto',
-						                    left:10
-						                });
-
-						                var row = Ti.UI.createTableViewRow({height:'auto',
+                                    var label = Ti.UI.createLabel({
+                                        color: '#fff',
+                                        backgroundColor: '#000',
+                                        text:' Inspection            ' + results[0].inspections[c].date,
+                                        height:'auto',
+                                        width:'auto',
+                                        left:10
+                                    });
+                                    var row = Ti.UI.createTableViewRow({height:'auto',
 										backgroundColor:'#000',
-										color:'#FFF',});
-						                row.add(label);
-						                dedata[c].add(row);
+										color:'#FFF'});
+                                    row.add(label);
+                                    dedata[c].add(row);
+                                    Ti.API.debug("loop " + c);
+                                    if (results[0].inspections[c].questions != null) {
+                                        Ti.API.debug("questions:  " + results[0].inspections[c].questions.length);                         
+                                        for (var x=0;x<results[0].inspections[c].questions.length;x++)
+                                        {						               
+                                            var categoryLabel = Ti.UI.createLabel({
+                                                color: '#fff',
+                                                backgroundColor: '#0066CC',
+                                                text:results[0].inspections[c].questions[x].category,
+                                                height:'auto',
+                                                width:'auto',
+                                                left:10
+                                            });
+                                            var row = Ti.UI.createTableViewRow({height:'auto',
+                                                backgroundColor:'#0066CC',
+                                                color:'#FFF'
+                                            });
+                                            row.add(categoryLabel);
+                                            dedata[c].add(row);
 
-						                row.addEventListener('click',function(e)
-						                {
-						                    Ti.API.info("row click on row. index = "+e.index+", row = "+e.row+", section = "+e.section+", source="+e.source);
-						                });
-						            }
+                                            
+                                            var questionLabel = Ti.UI.createLabel({
+                                                color: '#000',
+                                                backgroundColor: '#fff',
+                                                text:results[0].inspections[c].questions[x].description,
+                                                height:'auto',
+                                                width:'auto',
+                                                left:10
+                                            });
+                                            var row = Ti.UI.createTableViewRow({height:'auto',
+                                                backgroundColor:'#fff',
+                                                color:'#FFF'
+                                            });
+                                            row.add(questionLabel);
+                                            dedata[c].add(row);
 
-						            dedata[c].addEventListener('click',function(e)
-						            {
-						                Ti.API.info("row click on section. index = "+e.index+", row = "+e.row+", section = "+e.section+", source="+e.source);
-						            });
 
-									    // create table view
+                                        }
+                                    }
+                                    else {
+                                        var questionLabel = Ti.UI.createLabel({
+                                        color: '#000',
+                                        backgroundColor: '#fff',
+                                        text:'This premise was found to be in compliance with the Ontario Food Premises Regulation.',
+                                        height:'auto',
+                                        width:'auto',
+                                        left:10
+                                        });
+                                        var row = Ti.UI.createTableViewRow({height:'auto',
+                                            backgroundColor:'#fff',
+                                            color:'#FFF'});
+                                        row.add(questionLabel);
+                                        dedata[c].add(row);
+                                    }
+
+                                }
+
+									    Ti.API.debug("done loop ");
+                                        // create table view
+                                        
 								        var detailview = Titanium.UI.createTableView({
 								            data:dedata,
 								            style: Titanium.UI.iPhone.TableViewStyle.GROUPED,
 								            //rowHeight:80,
-								            minRowHeight:30
+								            minRowHeight:30,
+                                            top:50,
+                                            backgroundColor:'#E0E0E0'
 								            //maxRowHeight:500,
 								        });
+                                        /*
+                                        var nameLabel = Ti.UI.createLabel({
+                                            color: '#000',
+                                            //backgroundColor: '#000',
+                                            text:results[0].name,
+                                            font:{fontSize:18,fontWeight:'bold', fontFamily:'Helvetica Neue'},
+                                            height:'auto',
+                                            width:'auto',
+                                            left:10,
+                                            top:5
+                                        });
+                                        detailview.add(nameLabel);
+                                        var addressLabel = Ti.UI.createLabel({
+                                            color:'#222',
+                                            font:{fontSize:14,fontWeight:'normal', fontFamily:'Arial'},
+                                            text:results[0].street_number + ' ' + results[0].street_name,
+                                            height:'auto',
+                                            width:'auto',
+                                            left:10,
+                                            top:25
+                                        });
+                                        detailview.add(addressLabel);
+                                        */
 
 								        // create table view event listener
 								        detailview.addEventListener('click', function(e)
@@ -231,7 +327,7 @@ function populateTable(info) {
 								            Titanium.UI.createAlertDialog({title:'Table View',message:'row ' + row + ' index ' + index + ' section ' + section  + ' row data ' + rowdata}).show();
 								        });
 
-						        }
+						        
 
 
 
@@ -328,31 +424,38 @@ var actInd = Titanium.UI.createActivityIndicator({
 
 function getResults(term) {  // term = "search term"
     Ti.API.debug("call to getResults");
- 	showIndicator();
-    try {
-        if (!xhr) {
-            var xhr = Titanium.Network.createHTTPClient();
+    if (!Titanium.Network.online) {
+        var a = Titanium.UI.createAlertDialog({
+            title:'Network Connection Required',
+            message: 'EatSafeOttawa requires an internet connection to, you know, get stuff from the internet.          Check your network connection and try again.'
+        });
+        a.show();
+    }
+    else {
+        showIndicator();
+        try {
+            if (!xhr) {
+                var xhr = Titanium.Network.createHTTPClient();
+            }
+            nearbyUrl = 'http://openottawa.org/api/fsi/nearby.php?q='+term+'&lat='+lat+"&lon="+lon;
+            xhr.open('GET',nearbyUrl);
+            Titanium.API.debug("getting results - " + nearbyUrl);
+
+            xhr.onload = function() {
+                results = JSON.parse(this.responseText);
+                populateTable(results);
+            };
+            xhr.send();
         }
-        nearbyUrl = 'http://openottawa.org/api/fsi/nearby.php?q='+term+'&lat='+lat+"&lon="+lon;
-        xhr.open('GET',nearbyUrl);
-        Titanium.API.debug("getting results - " + nearbyUrl);
-
-        xhr.onload = function() {
-            results = JSON.parse(this.responseText);
-            populateTable(results);
-        };
-        xhr.send();
+        catch(err) {
+            Titanium.UI.createAlertDialog({
+                title: "Error",
+                message: String(err),
+                buttonNames: ['OK']
+            }).show();
+            hideIndicator();
+        }
     }
-
-    catch(err) {
-        Titanium.UI.createAlertDialog({
-            title: "Error",
-            message: String(err),
-            buttonNames: ['OK']
-        }).show();
-    hideIndicator();
-    }
-
 }
 
 // create tab group
@@ -436,10 +539,27 @@ var info = [
 	{title:'Royal Oak', hasDetail:true, id:'101112', address:'1415 Bank St.', city:'Ottawa',phone:'613-555-1212'}
 ];
 */
+/*
 var details = [
     {title:'1 FOR 1 PIZZA', address:'1415 Bank St. ', compliance:"NO", date:'2010-01-01', report:[]},
     {title:'1 FOR 1 PIZZA', address:'1415 Bank St. ', compliance:"YES", date:'2010-02-15', desc_en:'This premise was found to be in compliance with the Ontario Food Premises Regulation.'}
 ];
+*/
+var details = [
+    {title:'1 FOR 1 PIZZA', address:'1415 Bank St. ', compliance:'NO', date:'2010-01-01', inspections : [
+        { id: "0C8E5B6F-61A3-4539-89C3-17D6C618A9B4", compliance:"1", date:"2010-02-24",
+        questions : [
+            {id:"3",category:"Safety and Design", description : "Lighting adequate for food preparation and cleaning",
+            comments: [
+                {text_en:"Comment number 1",text_fr:"Comment number un"},
+                {text_en:"Comment number 2",text_fr:"Comment numbero deux"},
+            ]},
+            {id:"5",category:"Safety and Design", description : "Separate hand washing basin provided for food handlers"}
+        ]},
+        { id: '78C5BA8B-DAB1-4AAF-B47A-73B2F811E91B', compliance:'1', date:'2010-02-28',
+        questions : [] }
+    ]
+}];
 
 
 
@@ -691,13 +811,6 @@ tabGroup.open();
 
 
 
-if (!Titanium.Network.online) {
-  var a = Titanium.UI.createAlertDialog({
-    title:'Network Connection Required',
-    message: 'EatSafeOttawa requires an internet connection to, you know, get stuff from the internet.  Check your network connection and try again.'
-  });
-	a.show();
-}
 // Fetch initial results
 //setTimeout(getResults('pizza',true), 100);
 
@@ -705,7 +818,7 @@ if (!Titanium.Network.online) {
     //actInd.show();
     //setTimeout(getResults(''),1000);
 //showIndicator();
-getResults('');
+startup();
 
 
 // response
