@@ -36,6 +36,43 @@ function startup() {
 var indWin = null;
 var actInd = null;
 
+
+function format_mysqldate (mysqldate) {
+	// example mysql date: 2008-01-27 20:41:25
+	// we need to replace the dashes with slashes
+	var date = String(mysqldate).replace(/\-/g, '/');
+	return format_date(date);
+}
+function format_date (date) {
+	// date can be in msec or in a format recognized by Date.parse()
+	var d = new Date(date);
+
+	var days_of_week = Array('Sun','Mon','Tue','Wed','Thu','Fri','Sat');
+	var day_of_week = days_of_week[d.getDay()];
+
+	var year = d.getFullYear();
+	var months = Array('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec');
+	var month = months[d.getMonth()];
+	var day = d.getDate();
+
+	var hour = d.getHours();
+	var minute = d.getMinutes();
+	var am_pm = 'am';
+
+	if(hour == 0) {
+		hour = 12;
+	} else if (hour == 12) {
+		am_pm = 'pm';
+	} else if (hour > 12) {
+		hour -= 12;
+		am_pm = 'pm';
+	}
+	if(minute < 10) { minute = '0'+minute; }
+
+	var date_formatted = month+' '+day+', '+year;
+	return date_formatted;
+}
+
 function showIndicator()
 {
 	Ti.API.debug("calling show indicator");
@@ -177,7 +214,7 @@ function populateTable(info) {
 									translucent:false,
                                     backgroundColor:'#E0E0E0'
 								});
-                                
+
                                 var nameLabel = Ti.UI.createLabel({
                                     color: '#000',
                                     //backgroundColor: '#000',
@@ -204,7 +241,7 @@ function populateTable(info) {
 						        var dedata = [];
                                  Ti.API.debug(results);
 
-                                Ti.API.debug(results[0].inspections.length);
+                                //Ti.API.debug(results[0].inspections.length);
 						        for (var c=0;c<results[0].inspections.length;c++)
 						        {
 
@@ -213,7 +250,10 @@ function populateTable(info) {
                                     var label = Ti.UI.createLabel({
                                         color: '#fff',
                                         backgroundColor: '#000',
-                                        text:' Inspection            ' + results[0].inspections[c].date,
+                                        touchEnabled:false,
+                                        selectionStye:Titanium.UI.iPhone.TableViewCellSelectionStyle.NONE,
+                                    	font:{fontSize:16,fontWeight:'normal', fontFamily:'Arial'},
+                                        text:' Inspection                          ' + format_mysqldate(results[0].inspections[c].date),
                                         height:'auto',
                                         width:'auto',
                                         left:10
@@ -223,40 +263,61 @@ function populateTable(info) {
 										color:'#FFF'});
                                     row.add(label);
                                     dedata[c].add(row);
-                                    Ti.API.debug("loop " + c);
-                                    if (results[0].inspections[c].questions != null) {
-                                        Ti.API.debug("questions:  " + results[0].inspections[c].questions.length);                         
-                                        for (var x=0;x<results[0].inspections[c].questions.length;x++)
-                                        {						               
-                                            var categoryLabel = Ti.UI.createLabel({
-                                                color: '#fff',
-                                                backgroundColor: '#0066CC',
-                                                text:results[0].inspections[c].questions[x].category,
-                                                height:'auto',
-                                                width:'auto',
-                                                left:10
-                                            });
-                                            var row = Ti.UI.createTableViewRow({height:'auto',
-                                                backgroundColor:'#0066CC',
-                                                color:'#FFF'
-                                            });
-                                            row.add(categoryLabel);
-                                            dedata[c].add(row);
 
-                                            
+                                    Ti.API.debug("loop " + c);
+                                    if (results[0].inspections[c].questions != null && results[0].inspections[c].questions != 0) {
+                                        Ti.API.debug("questions:  " + results[0].inspections[c].questions.length);
+										var lastCategory = "";
+                                        for (var x=0;x<results[0].inspections[c].questions.length;x++)
+                                        {
+											if (lastCategory != results[0].inspections[c].questions[x].category) {
+												// Only show category label if not already showing that category
+												var categoryLabel = Ti.UI.createLabel({
+	                                                color: '#fff',
+	                                                backgroundColor: '#0066CC',
+	                                    			font:{fontSize:12,fontWeight:'bold', fontFamily:'Helvetica'},
+	                                                text:results[0].inspections[c].questions[x].category,
+	                                                height:15,
+	                                                width:'auto',
+	                                                left:14
+	                                            });
+	                                            var row = Ti.UI.createTableViewRow({
+	                                                backgroundColor:'#0066CC',
+	                                                height:'auto',
+	                                                color:'#FFF',
+	                                                touchEnabled:false,
+	                                                selectionStye:Titanium.UI.iPhone.TableViewCellSelectionStyle.NONE
+	                                            });
+	                                            row.add(categoryLabel);
+	                                            dedata[c].add(row);
+												lastCategory = results[0].inspections[c].questions[x].category;
+											}
+
+
                                             var questionLabel = Ti.UI.createLabel({
                                                 color: '#000',
-                                                backgroundColor: '#fff',
+                                                backgroundColor: 'transparent',
+                                    			font:{fontSize:12,fontWeight:'normal', fontFamily:'Helvetica'},
                                                 text:results[0].inspections[c].questions[x].description,
                                                 height:'auto',
-                                                width:'auto',
+												top:10,
+												bottom:10,
+                                                width:250,
                                                 left:10
                                             });
                                             var row = Ti.UI.createTableViewRow({height:'auto',
                                                 backgroundColor:'#fff',
+                                                touchEnabled:false,
+                                                selectionStye:Titanium.UI.iPhone.TableViewCellSelectionStyle.NONE,
+                                                //layout:'vertical',
+                                                height:'auto',
                                                 color:'#FFF'
                                             });
+
+
                                             row.add(questionLabel);
+                                            complianceImage = Titanium.UI.createImageView({url:'notincompliance.png', left:234,top:5,right:0});
+										    row.add(complianceImage);
                                             dedata[c].add(row);
 
 
@@ -265,16 +326,21 @@ function populateTable(info) {
                                     else {
                                         var questionLabel = Ti.UI.createLabel({
                                         color: '#000',
-                                        backgroundColor: '#fff',
+                                        backgroundColor: 'transparent',
+                               			font:{fontSize:12,fontWeight:'normal', fontFamily:'Helvetica'},
                                         text:'This premise was found to be in compliance with the Ontario Food Premises Regulation.',
-                                        height:'auto',
-                                        width:'auto',
+                                        height:'45',
+                                        width:250,
                                         left:10
                                         });
                                         var row = Ti.UI.createTableViewRow({height:'auto',
                                             backgroundColor:'#fff',
                                             color:'#FFF'});
+
                                         row.add(questionLabel);
+										// Add compliance image
+                                        complianceImage = Titanium.UI.createImageView({url:'incompliance.png', left:234,top:5,right:0});
+									    row.add(complianceImage);
                                         dedata[c].add(row);
                                     }
 
@@ -282,7 +348,7 @@ function populateTable(info) {
 
 									    Ti.API.debug("done loop ");
                                         // create table view
-                                        
+
 								        var detailview = Titanium.UI.createTableView({
 								            data:dedata,
 								            style: Titanium.UI.iPhone.TableViewStyle.GROUPED,
@@ -317,7 +383,7 @@ function populateTable(info) {
                                         */
 
 								        // create table view event listener
-								        detailview.addEventListener('click', function(e)
+								     /*   detailview.addEventListener('click', function(e)
 								        {
 								            // event data
 								            var index = e.index;
@@ -325,9 +391,9 @@ function populateTable(info) {
 								            var row = e.row;
 								            var rowdata = e.rowData;
 								            Titanium.UI.createAlertDialog({title:'Table View',message:'row ' + row + ' index ' + index + ' section ' + section  + ' row data ' + rowdata}).show();
-								        });
+								        });*/
 
-						        
+
 
 
 
