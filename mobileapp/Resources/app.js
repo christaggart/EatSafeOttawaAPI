@@ -1,7 +1,14 @@
+//
+//  app.js
+//  EatSafe Ottawa
+//
+//  Created by Chris Taggart & Aaron Sadhankar on March, 2010.
+//  Licensed under the MIT license. If you use parts of this for something though, we'd love to know.
+//
 
-
-// Include JSON parser
+// Include JSON parser & helpers
 Titanium.include('json2.js');
+Titanium.include('helpers.js');
 
 //Include app header
 //Titanium.include('header.js');
@@ -18,14 +25,7 @@ var results = [];
 var tableView;
 var data = [];
 
-var info = [
-       {id:'B789A388-ED35-490D-A68F-518EA3893A88', title:'1 FOR 1 PIZZA', hasDetail:true, id:'123', address:'1415 Bank St.', city:'Ottawa',phone:'613-555-1212'},
-       {id:'B789A388-ED35-490D-A68F-518EA3893A88', title:'Royal Thai', hasDetail:true, id:'456', address:'1415 Bank St.', city:'Ottawa',phone:'613-555-1212'},
-       {id:'B789A388-ED35-490D-A68F-518EA3893A88', title:'Sante Restaurant', hasDetail:true, id:'789', address:'1415 Bank St.', city:'Ottawa',phone:'613-555-1212'},
-       {id:'B789A388-ED35-490D-A68F-518EA3893A88', title:'Royal Oak', hasDetail:true, id:'101112', address:'1415 Bank St.', city:'Ottawa',phone:'613-555-1212'}
-];
-
-
+// TODO fix this
 function startup() {
     getResults('');
 };
@@ -36,42 +36,6 @@ function startup() {
 var indWin = null;
 var actInd = null;
 
-
-function format_mysqldate (mysqldate) {
-	// example mysql date: 2008-01-27 20:41:25
-	// we need to replace the dashes with slashes
-	var date = String(mysqldate).replace(/\-/g, '/');
-	return format_date(date);
-}
-function format_date (date) {
-	// date can be in msec or in a format recognized by Date.parse()
-	var d = new Date(date);
-
-	var days_of_week = Array('Sun','Mon','Tue','Wed','Thu','Fri','Sat');
-	var day_of_week = days_of_week[d.getDay()];
-
-	var year = d.getFullYear();
-	var months = Array('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec');
-	var month = months[d.getMonth()];
-	var day = d.getDate();
-
-	var hour = d.getHours();
-	var minute = d.getMinutes();
-	var am_pm = 'am';
-
-	if(hour == 0) {
-		hour = 12;
-	} else if (hour == 12) {
-		am_pm = 'pm';
-	} else if (hour > 12) {
-		hour -= 12;
-		am_pm = 'pm';
-	}
-	if(minute < 10) { minute = '0'+minute; }
-
-	var date_formatted = month+' '+day+', '+year;
-	return date_formatted;
-}
 
 function showIndicator()
 {
@@ -94,7 +58,7 @@ function showIndicator()
 		opacity:0.8
 	});
 	indWin.add(indView);
-
+	//TODO fix this too.
 	// loading indicator
 	actInd = Titanium.UI.createActivityIndicator({
 		style:Titanium.UI.iPhone.ActivityIndicatorStyle.BIG,
@@ -114,9 +78,14 @@ function showIndicator()
 	});
 	indWin.add(message);
 
-
-
 	indWin.open();
+
+	// TODO change text after a long wait
+	//var msgArray = ['loading','still loading','really shouldn\'t take this long', 'wow, i\'m really sorry.'];
+	//Ti.API.debug(Math.floor(Math.random()*msgArray.length+1)); //
+	//setTimeout ( "var dex = Math.floor(Math.random()*msgArray.length+1; message.text = msgArray[dex];", 1000 );
+	//message.text = 'still waiting, eh?';
+
 	Ti.API.debug(indWin.modal);
 	indView.show();
 	indWin.show();
@@ -124,30 +93,17 @@ function showIndicator()
 	Ti.API.debug(indWin.opacity);
 	Ti.API.debug(indView.visible);
 	Ti.API.debug(indView.opacity);
-	//if (tableView) {
-    // 	tableView.opacity = 0.5;
-    //	tableView.touchEnable = false;
-    //	tableView.hide();
-	//}
+
 	actInd.show();
 
 };
 
 function hideIndicator()
 {
-	Ti.API.debug("calling hide INdicator");
-	//if (tableView) {
-	//	tableView.opacity = 1.0;
-    //	tableView.touchEnable = true;
-    //	tableView.show();
-	//}
+	Ti.API.debug("Calling hide indicator");
     actInd.hide();
 	indWin.close({opacity:0,duration:500});
 };
-
-function getDetailView(id) {
-
-}
 
 
 function populateTable(info) {
@@ -164,8 +120,11 @@ function populateTable(info) {
                row.height = 48;
                row.className = 'datarow';
 
+			var detailId = info[i].id;
+
             var title = Ti.UI.createLabel({
-                       color:'#000',font:{fontSize:18,fontWeight:'bold', fontFamily:'Helvetica Neue'}, left:10,top:5,  height:20,      width:200,text:info[i].name
+                       color:'#000',
+                       font:{fontSize:13,fontWeight:'bold', fontFamily:'Helvetica'}, left:10,top:5,  height:20, width:270,text:info[i].name
             });
             title.addEventListener('click', function(e)
             {
@@ -179,7 +138,7 @@ function populateTable(info) {
 
            var address = Ti.UI.createLabel({
                color:'#222',
-                       font:{fontSize:14,fontWeight:'normal', fontFamily:'Arial'},
+                       font:{fontSize:12,fontWeight:'normal', fontFamily:'Helvetica'},
                        left:10,
                        top:24,
                        height:20,
@@ -202,7 +161,7 @@ function populateTable(info) {
 					        if (!xhr) {
 					            var xhr = Titanium.Network.createHTTPClient();
 					        }
-					        detailsUrl = 'http://openottawa.org/api/fsi/details.php';
+					        detailsUrl = 'http://openottawa.org/api/fsi/details.php?id='+detailId;
 					        xhr.open('GET',detailsUrl);
 					        Titanium.API.debug("getting results - " + detailsUrl);
 
@@ -219,16 +178,17 @@ function populateTable(info) {
                                     color: '#000',
                                     //backgroundColor: '#000',
                                     text:results[0].name,
-                                    font:{fontSize:18,fontWeight:'bold', fontFamily:'Helvetica Neue'},
+                                    font:{fontSize:18,fontWeight:'bold', fontFamily:'Helvetica'},
                                     height:'auto',
                                     width:'auto',
                                     left:10,
                                     top:5
                                 });
                                 detail.add(nameLabel);
+
                                 var addressLabel = Ti.UI.createLabel({
                                     color:'#222',
-                                    font:{fontSize:14,fontWeight:'normal', fontFamily:'Arial'},
+                                    font:{fontSize:14,fontWeight:'normal', fontFamily:'Helvetica'},
                                     text:results[0].street_number + ' ' + results[0].street_name,
                                     height:'auto',
                                     width:'auto',
@@ -248,11 +208,12 @@ function populateTable(info) {
                                     dedata[c] = Ti.UI.createTableViewSection();
 
                                     var label = Ti.UI.createLabel({
+										className: 'label'+c,
                                         color: '#fff',
                                         backgroundColor: '#000',
                                         touchEnabled:false,
                                         selectionStye:Titanium.UI.iPhone.TableViewCellSelectionStyle.NONE,
-                                    	font:{fontSize:16,fontWeight:'normal', fontFamily:'Arial'},
+                                    	font:{fontSize:16,fontWeight:'normal', fontFamily:'Helvetica'},
                                         text:' Inspection                          ' + format_mysqldate(results[0].inspections[c].date),
                                         height:'auto',
                                         width:'auto',
@@ -260,6 +221,7 @@ function populateTable(info) {
                                     });
                                     var row = Ti.UI.createTableViewRow({height:'auto',
 										backgroundColor:'#000',
+										className: 'row'+c,
 										color:'#FFF'});
                                     row.add(label);
                                     dedata[c].add(row);
@@ -271,18 +233,22 @@ function populateTable(info) {
                                         for (var x=0;x<results[0].inspections[c].questions.length;x++)
                                         {
 											if (lastCategory != results[0].inspections[c].questions[x].category) {
+
 												// Only show category label if not already showing that category
 												var categoryLabel = Ti.UI.createLabel({
 	                                                color: '#fff',
+													className:'catLabel'+x,
 	                                                backgroundColor: '#0066CC',
-	                                    			font:{fontSize:12,fontWeight:'bold', fontFamily:'Helvetica'},
+	                                    			font:{fontSize:11,fontWeight:'bold', fontFamily:'Helvetica'},
 	                                                text:results[0].inspections[c].questions[x].category,
 	                                                height:15,
-	                                                width:'auto',
+	                                                width:280,
+
 	                                                left:14
 	                                            });
 	                                            var row = Ti.UI.createTableViewRow({
 	                                                backgroundColor:'#0066CC',
+													className:'catRow'+x,
 	                                                height:'auto',
 	                                                color:'#FFF',
 	                                                touchEnabled:false,
@@ -296,6 +262,7 @@ function populateTable(info) {
 
                                             var questionLabel = Ti.UI.createLabel({
                                                 color: '#000',
+												className:'qLabel'+x,
                                                 backgroundColor: 'transparent',
                                     			font:{fontSize:12,fontWeight:'normal', fontFamily:'Helvetica'},
                                                 text:results[0].inspections[c].questions[x].description,
@@ -306,6 +273,7 @@ function populateTable(info) {
                                                 left:10
                                             });
                                             var row = Ti.UI.createTableViewRow({height:'auto',
+												className:'qRow'+x,
                                                 backgroundColor:'#fff',
                                                 touchEnabled:false,
                                                 selectionStye:Titanium.UI.iPhone.TableViewCellSelectionStyle.NONE,
@@ -358,49 +326,6 @@ function populateTable(info) {
                                             backgroundColor:'#E0E0E0'
 								            //maxRowHeight:500,
 								        });
-                                        /*
-                                        var nameLabel = Ti.UI.createLabel({
-                                            color: '#000',
-                                            //backgroundColor: '#000',
-                                            text:results[0].name,
-                                            font:{fontSize:18,fontWeight:'bold', fontFamily:'Helvetica Neue'},
-                                            height:'auto',
-                                            width:'auto',
-                                            left:10,
-                                            top:5
-                                        });
-                                        detailview.add(nameLabel);
-                                        var addressLabel = Ti.UI.createLabel({
-                                            color:'#222',
-                                            font:{fontSize:14,fontWeight:'normal', fontFamily:'Arial'},
-                                            text:results[0].street_number + ' ' + results[0].street_name,
-                                            height:'auto',
-                                            width:'auto',
-                                            left:10,
-                                            top:25
-                                        });
-                                        detailview.add(addressLabel);
-                                        */
-
-								        // create table view event listener
-								     /*   detailview.addEventListener('click', function(e)
-								        {
-								            // event data
-								            var index = e.index;
-								            var section = e.section;
-								            var row = e.row;
-								            var rowdata = e.rowData;
-								            Titanium.UI.createAlertDialog({title:'Table View',message:'row ' + row + ' index ' + index + ' section ' + section  + ' row data ' + rowdata}).show();
-								        });*/
-
-
-
-
-
-						        // add table view to the window
-						        //Titanium.UI.currentWindow.add(tableview);
-
-						        //var curWin = Titanium.UI.currentWindow;
 
 						        detail.add(detailview);
 
@@ -432,7 +357,7 @@ function populateTable(info) {
                data:data,
                search:search,
                visible:false,
-               filterAttribute:'filter'
+               filterAttribute:'name'
        });
 
        tableView.addEventListener('click', function(e)
@@ -477,17 +402,6 @@ function getLocation() {
 }
 
 
-/*
-var actInd = Titanium.UI.createActivityIndicator({
-	//color:'#000000',
-	style:Titanium.UI.iPhone.ActivityIndicatorStyle.PLAIN,
-    font:{fontFamily:'Helvetica Neue', fontSize:15,fontWeight:'bold'},
-	color:'red',
-	message:'Loading...'
-
-});
-*/
-
 function getResults(term) {  // term = "search term"
     Ti.API.debug("call to getResults");
     if (!Titanium.Network.online) {
@@ -509,6 +423,7 @@ function getResults(term) {  // term = "search term"
 
             xhr.onload = function() {
                 results = JSON.parse(this.responseText);
+  				Titanium.API.debug(results);
                 populateTable(results);
             };
             xhr.send();
@@ -596,181 +511,9 @@ search.addEventListener('cancel', function(e)
    search.blur();
 });
 
-
-/*
-var info = [
-	{title:'1 FOR 1 PIZZA', hasDetail:true, id:'123', address:'1415 Bank St.', city:'Ottawa',phone:'613-555-1212'},
-	{title:'Royal Thai', hasDetail:true, id:'456', address:'1415 Bank St.', city:'Ottawa',phone:'613-555-1212'},
-	{title:'Sante Restaurant', hasDetail:true, id:'789', address:'1415 Bank St.', city:'Ottawa',phone:'613-555-1212'},
-	{title:'Royal Oak', hasDetail:true, id:'101112', address:'1415 Bank St.', city:'Ottawa',phone:'613-555-1212'}
-];
-*/
-/*
-var details = [
-    {title:'1 FOR 1 PIZZA', address:'1415 Bank St. ', compliance:"NO", date:'2010-01-01', report:[]},
-    {title:'1 FOR 1 PIZZA', address:'1415 Bank St. ', compliance:"YES", date:'2010-02-15', desc_en:'This premise was found to be in compliance with the Ontario Food Premises Regulation.'}
-];
-*/
-var details = [
-    {title:'1 FOR 1 PIZZA', address:'1415 Bank St. ', compliance:'NO', date:'2010-01-01', inspections : [
-        { id: "0C8E5B6F-61A3-4539-89C3-17D6C618A9B4", compliance:"1", date:"2010-02-24",
-        questions : [
-            {id:"3",category:"Safety and Design", description : "Lighting adequate for food preparation and cleaning",
-            comments: [
-                {text_en:"Comment number 1",text_fr:"Comment number un"},
-                {text_en:"Comment number 2",text_fr:"Comment numbero deux"},
-            ]},
-            {id:"5",category:"Safety and Design", description : "Separate hand washing basin provided for food handlers"}
-        ]},
-        { id: '78C5BA8B-DAB1-4AAF-B47A-73B2F811E91B', compliance:'1', date:'2010-02-28',
-        questions : [] }
-    ]
-}];
-
-
-
 var currentRow = null;
 var currentRowIndex = null;
 var i=0;
-
-/*
-for (i=0;i<info.length;i++)
-{
-    //Titanium.UI.createAlertDialog({title:'TEST',message:'Test Message.'}).show();
-    var row = Ti.UI.createTableViewRow({hasDetail:true});
-    //row.selectedBackgroundColor = '#fff';
-	row.height = 48;
-	row.className = 'datarow';
-
-	var title = Ti.UI.createLabel({
-		color:'#000',
-		font:{fontSize:22,fontWeight:'bold', fontFamily:'Helvetica Neue'},
-		left:10,
-		top:5,
-		height:20,
-		width:200,
-		text:info[i].title
-	});
-    title.addEventListener('click', function(e)
-    {
-        var rowNum = e.source.rowNum;
-    });
-
-    row.filter = title.text;
-    title.rowNum = i+1;
-
-    row.add(title);
-
-    var address = Ti.UI.createLabel({
-        color:'#222',
-		font:{fontSize:14,fontWeight:'normal', fontFamily:'Arial'},
-		left:10,
-		top:24,
-		height:20,
-		width:200,
-		text:info[i].address
-	});
-    address.addEventListener('click', function(e)
-    {
-        var rowNum = e.source.rowNum;
-    });
-    row.add(address);
-
-    row.addEventListener('touchstart', function(e)
-    {
-        //tableView.animate();
-        Titanium.UI.createAlertDialog({title:'TEST',message:'row touchstart eventlistener.'}).show();
-    });
-
-    row.addEventListener('touchstart', function(e)
-    {
-        Titanium.UI.createAlertDialog({title:'TEST',message:'row touchstart eventlistener.'}).show();
-    });
-
-    // create table view row event listener
-    row.addEventListener('click', function(e)
-    {
-
-		var detail = Titanium.UI.createWindow({
-			backgroundColor:'#0071ce',
-			barColor:'#000',
-			translucent:false
-		});
-
-        // create table view data object
-        var dedata = [];
-
-
-        for (var c=0;c<1;c++)
-        {
-
-            dedata[c] = Ti.UI.createTableViewSection({headerTitle:details[0].title + ", " + details[0].address});
-
-            for (var x=0;x<details.length;x++)
-            {
-                var label = Ti.UI.createLabel({
-                    text:'Date: ' + details[x].date + "\n" + details[x].report,
-                    height:'auto',
-                    width:'auto',
-                    left:10
-                });
-
-                var row = Ti.UI.createTableViewRow({height:'auto'});
-                row.add(label);
-                dedata[c].add(row);
-
-                row.addEventListener('click',function(e)
-                {
-                    Ti.API.info("row click on row. index = "+e.index+", row = "+e.row+", section = "+e.section+", source="+e.source);
-                });
-            }
-
-            dedata[c].addEventListener('click',function(e)
-            {
-                Ti.API.info("row click on section. index = "+e.index+", row = "+e.row+", section = "+e.section+", source="+e.source);
-            });
-        }
-
-        // create table view
-        var detailview = Titanium.UI.createTableView({
-            data:dedata,
-            style: Titanium.UI.iPhone.TableViewStyle.GROUPED,
-            //rowHeight:80,
-            minRowHeight:80
-            //maxRowHeight:500,
-        });
-
-        // create table view event listener
-        detailview.addEventListener('click', function(e)
-        {
-            // event data
-            var index = e.index;
-            var section = e.section;
-            var row = e.row;
-            var rowdata = e.rowData;
-            Titanium.UI.createAlertDialog({title:'Table View',message:'row ' + row + ' index ' + index + ' section ' + section  + ' row data ' + rowdata}).show();
-        });
-
-
-        // add table view to the window
-        //Titanium.UI.currentWindow.add(tableview);
-
-        //var curWin = Titanium.UI.currentWindow;
-
-        detail.add(detailview);
-
-
-        //actInd.show();
-        tab1.open(detail,{animated:true});
-
-
-//
-    });
-
-    data.push(row);
-
-}
-*/
 
 
 //
@@ -779,7 +522,7 @@ for (i=0;i<info.length;i++)
 tableView = Titanium.UI.createTableView({
 	data:data,
 	search:search,
-	filterAttribute:'filter',
+	filterAttribute:'name',
     moving:false,
 	visible:false
 });
@@ -800,22 +543,8 @@ tableView.addEventListener('click', function(e)
 });
 
 
-//init();
-//win1.add(actInd);
-//tableView.add(actInd);
-//win1.add(tableView);
-
 win1.setRightNavButton(refresh);
 
-win1.addEventListener('touchstart', function(e)
-{
-    Titanium.UI.createAlertDialog({title:'TEST',message:'win1 touchstart eventlistener.'}).show();
-});
-
-tableView.addEventListener('touchstart', function(e)
-{
-    Titanium.UI.createAlertDialog({title:'TEST',message:'tableview touchstart eventlistener.'}).show();
-});
 
 
 //
@@ -823,7 +552,8 @@ tableView.addEventListener('touchstart', function(e)
 //
 var win2 = Titanium.UI.createWindow({
     title:'About',
-    backgroundColor:'#fff'
+    barColor: '#000',
+    backgroundColor:'#000'
 });
 var tab2 = Titanium.UI.createTab({
     icon:'KS_nav_ui.png',
@@ -844,27 +574,6 @@ win2.addEventListener('touchstart', function(e)
     Titanium.UI.createAlertDialog({title:'TEST',message:'win2 touchstart eventlistener.'}).show();
 });
 
-/*
-win2.addEventListener('touchmove', function(e)
-{
-    Titanium.UI.createAlertDialog({title:'TEST',message:'win2 touchmove eventlistener.'}).show();
-});
-
-win2.addEventListener('touchend', function(e)
-{
-    Titanium.UI.createAlertDialog({title:'TEST',message:'win2 touchend eventlistener.'}).show();
-});
-win2.addEventListener('singletap', function(e)
-{
-    Titanium.UI.createAlertDialog({title:'TEST',message:'win2 singletap eventlistener.'}).show();
-});*/
-
-/*curView.addEventListener('touchstart', function(e)
-{
-    //tableView.animate();
-    Titanium.UI.createAlertDialog({title:'TEST',message:'win touchstart eventlistener.'}).show();
-});*/
-
 //
 //  add tabs
 //
@@ -876,21 +585,5 @@ tabGroup.addTab(tab2);
 tabGroup.open();
 
 
-
-// Fetch initial results
-//setTimeout(getResults('pizza',true), 100);
-
-    //win1.setToolbar([actInd],{animated:true});
-    //actInd.show();
-    //setTimeout(getResults(''),1000);
-//showIndicator();
+// Tabs and Thunderbirds are go.
 startup();
-
-
-// response
-/*
-var response = JSON.parse(this.responseText);
-                       for(var x=0; x < response.length; x++) {
-                               alert(response[x].name);
-                       }
-*/
