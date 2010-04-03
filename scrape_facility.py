@@ -30,7 +30,7 @@ def parseFacilityPage(page):
 				print "\tENGLISH INSPECTIONS"
 				for child in child.getElementsByTagName('inspection'):
 					if child.getAttribute('inspectionid') !="": #id
-
+						facilitydetailid = ""
 						print "\t\tFound Inspection ID" + child.getAttribute('inspectionid')
 						inspection_id = child.getAttribute('inspectionid')
 						facilitydetailid = child.getAttribute('facilitydetailid')
@@ -47,7 +47,7 @@ def parseFacilityPage(page):
 							sort = child.getAttribute('sort')
 							complianceresultcode = child.getAttribute('complianceresultcode')
 							complianceresulttext = child.getAttribute('complianceresulttext')
-							risklevel = child.getAttribute('risklevel')
+							risklevel = child.getAttribute('risklevel``')
 							compliancecategorycode = child.getAttribute('compliancecategorycode')
 							compliancecategorytext = child.getAttribute('compliancecategorytext')
 							compliancedescriptioncode = child.getAttribute('compliancedecriptioncode')
@@ -149,10 +149,10 @@ cursor.execute("TRUNCATE api_inspection") # clear out existing inspections
 cursor.close()
 
 # Fetch result set to loop through to get details for
-db.query("SELECT detailid FROM api_facility WHERE detailid = 'B789A388-ED35-490D-A68F-518EA3893A88' OR detailid = 'F1583008-A6C6-4070-9F3E-D4CB0D97AE20'")#
-#db.query("SELECT detailid FROM api_facility")#
+#db.query("SELECT detailid FROM api_facility WHERE detailid = 'B789A388-ED35-490D-A68F-518EA3893A88' OR detailid = 'F1583008-A6C6-4070-9F3E-D4CB0D97AE20'")#
+db.query("SELECT detailid FROM api_facility")#
 r = db.store_result()
-for row in r.fetch_row(5):
+for row in r.fetch_row(6000):
 	scrape_facility(row[0]) # row [0] is the detail id
 	time.sleep(3) # wait three seconds
 
