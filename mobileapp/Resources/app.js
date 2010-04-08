@@ -161,7 +161,7 @@ function populateTable(info) {
 
 
            // create table view row event listener
-           row.addEventListener('click', function(e)
+           row.addEventListener('singletap', function(e)
            {
 			   	    showIndicator();
 					 try {
