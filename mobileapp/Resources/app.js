@@ -17,7 +17,9 @@ Titanium.include('helpers.js');
 //Titanium.include('json2.js'); // Creates a 'chooser' view we manipulate in the main app
 
 // this sets the background color of the master UIView (when there are no windows/tab groups on it)
-Titanium.UI.setBackgroundColor('#eee');
+Titanium.UI.setBackgroundColor('#000');
+Titanium.UI.setBackgroundImage('default_bg.png');
+
 var isLoaded = 0;
 var lat = 0;
 var lon = 0;
@@ -36,18 +38,21 @@ function startup() {
 var indWin = null;
 var actInd = null;
 
-
 function showIndicator()
 {
 	Ti.API.debug("calling show indicator");
 	// window container
 
-
 	indWin = Titanium.UI.createWindow({
-		modal:true,
-		height:150,
-		width:150
-	});
+		modal:true});
+
+
+	// black view
+	//var indHideyView = Titanium.UI.createView({
+	//	backgroundColor:'#fff',
+	//	opacity:0
+	//});
+
 
 	// black view
 	var indView = Titanium.UI.createView({
@@ -57,6 +62,8 @@ function showIndicator()
 		borderRadius:10,
 		opacity:0.8
 	});
+
+	//indWin.add(indHideyView);
 	indWin.add(indView);
 	//TODO fix this too.
 	// loading indicator
@@ -77,7 +84,7 @@ function showIndicator()
 		bottom:20
 	});
 	indWin.add(message);
-
+    //indHideyWin.open();
 	indWin.open();
 
 	// TODO change text after a long wait
@@ -123,7 +130,7 @@ function populateTable(info) {
 			var detailId = info[i].id;
 
             var title = Ti.UI.createLabel({
-                       color:'#000',
+                       color:'#333',
                        font:{fontSize:13,fontWeight:'bold', fontFamily:'Helvetica'}, left:10,top:5,  height:20, width:270,text:info[i].name
             });
             title.addEventListener('click', function(e)
@@ -175,7 +182,7 @@ function populateTable(info) {
 								});
 
                                 var nameLabel = Ti.UI.createLabel({
-                                    color: '#000',
+                                    color: '#333',
                                     //backgroundColor: '#000',
                                     text:results[0].name,
                                     font:{fontSize:18,fontWeight:'bold', fontFamily:'Helvetica'},
@@ -219,6 +226,7 @@ function populateTable(info) {
                                         width:'auto',
                                         left:10
                                     });
+
                                     var row = Ti.UI.createTableViewRow({height:'auto',
 										backgroundColor:'#000',
 										className: 'row'+c,
@@ -582,7 +590,7 @@ tabGroup.addTab(tab2);
 
 
 // open tab group
-tabGroup.open();
+tabGroup.open({transition:Titanium.UI.iPhone.AnimationStyle.FLIP_FROM_RIGHT});
 
 
 // Tabs and Thunderbirds are go.
