@@ -70,20 +70,26 @@ function showIndicator()
 	actInd = Titanium.UI.createActivityIndicator({
 		style:Titanium.UI.iPhone.ActivityIndicatorStyle.BIG,
 		height:30,
-		width:30
+		width:30,
+        message:"loading",
+        color:'white'
+        //font:{fontSize:20,fontWeight:'bold'}
 	});
+    actInd.show();
 	indWin.add(actInd);
 
 	// message
+    /*
 	var message = Titanium.UI.createLabel({
 		text:'loading',
 		color:'#fff',
 		width:'auto',
 		height:'auto',
-		font:{fontSize:20,fontWeight:'bold'},
-		bottom:20
+		font:{fontSize:20,fontWeight:'bold'}
+		//bottom:20
 	});
-	indWin.add(message);
+    */
+	//indWin.add(message);
     //indHideyWin.open();
 	indWin.open();
 
@@ -96,12 +102,12 @@ function showIndicator()
 	Ti.API.debug(indWin.modal);
 	indView.show();
 	indWin.show();
-	actInd.show();
+	//actInd.show();
 	Ti.API.debug(indWin.opacity);
 	Ti.API.debug(indView.visible);
 	Ti.API.debug(indView.opacity);
 
-	actInd.show();
+	//actInd.show();
 
 };
 
@@ -109,7 +115,7 @@ function hideIndicator()
 {
 	Ti.API.debug("Calling hide indicator");
     actInd.hide();
-	indWin.close({opacity:0,duration:500});
+	indWin.close({opacity:0,duration:1000});
 };
 
 
@@ -133,7 +139,7 @@ function populateTable(info) {
                        color:'#333',
                        font:{fontSize:13,fontWeight:'bold', fontFamily:'Helvetica'}, left:10,top:5,  height:20, width:270,text:info[i].name
             });
-            title.addEventListener('click', function(e)
+            title.addEventListener('singletap', function(e)
             {
                var rowNum = e.source.rowNum;
             });
@@ -152,7 +158,7 @@ function populateTable(info) {
                        width:200,
                        text:info[i].street_number + " " + info[i].street_name
                });
-           address.addEventListener('click', function(e)
+           address.addEventListener('singletap', function(e)
            {
                var rowNum = e.source.rowNum;
            });
@@ -219,7 +225,7 @@ function populateTable(info) {
                                         color: '#fff',
                                         backgroundColor: '#000',
                                         touchEnabled:false,
-                                        selectionStye:Titanium.UI.iPhone.TableViewCellSelectionStyle.NONE,
+                                        selectionStyle:Titanium.UI.iPhone.TableViewCellSelectionStyle.NONE,
                                     	font:{fontSize:16,fontWeight:'normal', fontFamily:'Helvetica'},
                                         text:' Inspection                          ' + format_mysqldate(results[0].inspections[c].date),
                                         height:'auto',
@@ -260,7 +266,7 @@ function populateTable(info) {
 	                                                height:'auto',
 	                                                color:'#FFF',
 	                                                touchEnabled:false,
-	                                                selectionStye:Titanium.UI.iPhone.TableViewCellSelectionStyle.NONE
+	                                                selectionStyle:Titanium.UI.iPhone.TableViewCellSelectionStyle.NONE
 	                                            });
 	                                            row.add(categoryLabel);
 	                                            dedata[c].add(row);
@@ -284,17 +290,53 @@ function populateTable(info) {
 												className:'qRow'+x,
                                                 backgroundColor:'#fff',
                                                 touchEnabled:false,
-                                                selectionStye:Titanium.UI.iPhone.TableViewCellSelectionStyle.NONE,
+                                                //selectionStyle:Titanium.UI.iPhone.TableViewCellSelectionStyle.NONE,
                                                 //layout:'vertical',
                                                 height:'auto',
                                                 color:'#FFF'
                                             });
 
-
                                             row.add(questionLabel);
                                             complianceImage = Titanium.UI.createImageView({url:'notincompliance.png', left:234,top:5,right:0});
 										    row.add(complianceImage);
                                             dedata[c].add(row);
+                                            row.addEventListener('singletap', function(e)
+                                            {
+                                                Ti.API.debug("row: " + e.row);
+                                                Ti.API.debug("index: " + e.index);
+                                                Ti.API.debug("dedata: " + dedata[0]);                                                
+                                                createCommentWindow(dedata);
+                                            });
+                                            
+                                            // Comment rows
+                                            for(var i = 0; results[0].inspections[c].questions[x].comments != null && 
+                                                i<results[0].inspections[c].questions[x].comments.length; i++) {
+                                                var commentLabel = Ti.UI.createLabel({
+                                                    color: '#000',
+                                                    className:'qLabel'+i,
+                                                    backgroundColor: 'transparent',
+                                                    font:{fontSize:12,fontWeight:'normal', fontFamily:'Helvetica'},
+                                                    text:'Comment:' + "\n" + results[0].inspections[c].questions[x].comments[i].text_en,
+                                                    height:'auto',
+                                                    top:10,
+                                                    bottom:10,
+                                                    width:250,
+                                                    left:10
+                                                });
+                                                var row = Ti.UI.createTableViewRow({height:'auto',
+                                                    className:'qRow'+i,
+                                                    backgroundColor:'#fff',
+                                                    touchEnabled:false,
+                                                    selectionStyle:Titanium.UI.iPhone.TableViewCellSelectionStyle.NONE,
+                                                    //layout:'vertical',
+                                                    height:'auto',
+                                                    color:'#FFF'
+                                                });
+
+                                                row.add(commentLabel);
+                                                dedata[c].add(row);
+                                            }
+
 
 
                                         }
@@ -318,6 +360,14 @@ function populateTable(info) {
                                         complianceImage = Titanium.UI.createImageView({url:'incompliance.png', left:234,top:5,right:0});
 									    row.add(complianceImage);
                                         dedata[c].add(row);
+                                        
+                                        row.addEventListener('singletap', function(e)
+                                        {
+                                            Ti.API.debug("row: " + e.row);
+                                            Ti.API.debug("index: " + e.index);
+                                            Ti.API.debug("dedata: " + dedata[0]);
+                                            createCommentWindow(dedata);
+                                        });
                                     }
 
                                 }
@@ -368,7 +418,7 @@ function populateTable(info) {
                filterAttribute:'name'
        });
 
-       tableView.addEventListener('click', function(e)
+       tableView.addEventListener('singletap', function(e)
        {
                if (currentRow != null && e.row.isUpdateRow == false)
                {
@@ -537,7 +587,7 @@ tableView = Titanium.UI.createTableView({
 
 
 
-tableView.addEventListener('click', function(e)
+tableView.addEventListener('singletap', function(e)
 {
 	if (currentRow != null && e.row.isUpdateRow == false)
 	{
@@ -554,6 +604,101 @@ tableView.addEventListener('click', function(e)
 win1.setRightNavButton(refresh);
 
 
+function disableTouch(exceptObject) {
+    Titanium.API.debug("exceptObject: " + exceptObject);
+        win1.touchEnable=false;
+        Titanium.API.debug("win 1 touch disabled");
+
+        win2.touchEnable=false;
+        Titanium.API.debug("win 2 touch disabled");
+
+        //tabgroup.touchEnable=false;
+        //Titanium.API.debug("tabgroup touch disabled");
+
+        //detail.touchEnable=false;
+        //Titanium.API.debug("detail touch disabled");
+        
+        //exceptOjbect.touchEnable=true;
+        Titanium.API.debug("exiting disableTouch");
+}
+
+function createCommentWindow() {
+    var t = Titanium.UI.create2DMatrix();
+    t = t.scale(0);
+
+    var w = Titanium.UI.createWindow({
+        //backgroundColor:'#336699',
+        backgroundColor:'black',
+        borderWidth:8,
+        borderColor:'#999',
+        //height:400,
+        //width:300,
+        borderRadius:10,
+        //opacity:0.80,
+        modal:true,
+        transform:t
+    });
+                                        
+
+    //disableTouch(w);
+
+    // create first transform to go beyond normal size
+    var t1 = Titanium.UI.create2DMatrix();
+    t1 = t1.scale(1.1);
+    var a = Titanium.UI.createAnimation();
+    a.transform = t1;
+    a.duration = 200;
+
+    // when this animation completes, scale to normal size
+    a.addEventListener('complete', function()
+    {
+        Titanium.API.info('here in complete');
+        var t2 = Titanium.UI.create2DMatrix();
+        t2 = t2.scale(1.0);
+        w.animate({transform:t2, duration:200});
+
+    });
+
+    // create a button to close window
+    var b = Titanium.UI.createButton({
+        title:'Close',
+        height:30,
+        width:200,
+        bottom:15
+    });
+    w.add(b);
+    b.addEventListener('click', function()
+    {
+        var t3 = Titanium.UI.create2DMatrix();
+        t3 = t3.scale(0);
+        w.close({transform:t3,duration:300});
+    });
+    
+    /*
+    var commentWinLabel1 = Titanium.UI.createLabel({
+        
+    });
+    */
+    
+    //Titanium.API.debug("data:" + dedata[c]);
+    var commentData = [];
+    
+    var commentWinTable = Titanium.UI.createTableView({
+        data:commentData,
+        style: Titanium.UI.iPhone.TableViewStyle.GROUPED,
+        //rowHeight:80,
+        minRowHeight:30,
+        top:50,
+        backgroundColor:'#E0E0E0'
+        //maxRowHeight:500,
+    });
+    //w.add(commentWinTable);
+    Titanium.API.debug('opening comment window');
+   
+
+    w.open(a);
+
+}
 
 //
 // create controls tab and root window
