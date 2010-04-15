@@ -49,15 +49,3 @@ def fetchPages():
 
 numPages = getTotalPages()
 fetchPages()
-
-
-
-#soup = BeautifulStoneSoup(page)
-
-#numResults = soup.xml.head.title
-#print soup.prettify()
-#for incident in soup('td', width="90%"):
- #   where, linebreak, what = incident.contents[:3]
-  #  print where.strip()
-   # print what.strip()
-    #print

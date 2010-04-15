@@ -156,7 +156,7 @@ function populateTable(info) {
                        top:24,
                        height:20,
                        width:200,
-                       text:info[i].street_number + " " + info[i].street_name
+                       text:info[i].street_number + " " + info[i].street_name + ' (' + (Math.round(info[i].distance*100)/100) + ' km)'
                });
            address.addEventListener('singletap', function(e)
            {
@@ -174,7 +174,7 @@ function populateTable(info) {
 					        if (!xhr) {
 					            var xhr = Titanium.Network.createHTTPClient();
 					        }
-					        detailsUrl = 'http://openottawa.org/api/fsi/details.php?id='+detailId;
+					        detailsUrl = 'http://eatsafe-api.heroku.com/facility/'+detailId;
 					        xhr.open('GET',detailsUrl);
 					        Titanium.API.debug("getting results - " + detailsUrl);
 
@@ -304,12 +304,12 @@ function populateTable(info) {
                                             {
                                                 Ti.API.debug("row: " + e.row);
                                                 Ti.API.debug("index: " + e.index);
-                                                Ti.API.debug("dedata: " + dedata[0]);                                                
+                                                Ti.API.debug("dedata: " + dedata[0]);
                                                 createCommentWindow(dedata);
                                             });
-                                            
+
                                             // Comment rows
-                                            for(var i = 0; results[0].inspections[c].questions[x].comments != null && 
+                                            for(var i = 0; results[0].inspections[c].questions[x].comments != null &&
                                                 i<results[0].inspections[c].questions[x].comments.length; i++) {
                                                 var commentLabel = Ti.UI.createLabel({
                                                     color: '#000',
@@ -360,7 +360,7 @@ function populateTable(info) {
                                         complianceImage = Titanium.UI.createImageView({url:'incompliance.png', left:234,top:5,right:0});
 									    row.add(complianceImage);
                                         dedata[c].add(row);
-                                        
+
                                         row.addEventListener('singletap', function(e)
                                         {
                                             Ti.API.debug("row: " + e.row);
@@ -475,7 +475,7 @@ function getResults(term) {  // term = "search term"
             if (!xhr) {
                 var xhr = Titanium.Network.createHTTPClient();
             }
-            nearbyUrl = 'http://openottawa.org/api/fsi/nearby.php?q='+term+'&lat='+lat+"&lon="+lon;
+            nearbyUrl = 'http://eatsafe-api.heroku.com/facilities/nearby?lat='+lat+"&lon="+lon;
             xhr.open('GET',nearbyUrl);
             Titanium.API.debug("getting results - " + nearbyUrl);
 
@@ -617,7 +617,7 @@ function disableTouch(exceptObject) {
 
         //detail.touchEnable=false;
         //Titanium.API.debug("detail touch disabled");
-        
+
         //exceptOjbect.touchEnable=true;
         Titanium.API.debug("exiting disableTouch");
 }
@@ -638,7 +638,7 @@ function createCommentWindow() {
         modal:true,
         transform:t
     });
-                                        
+
 
     //disableTouch(w);
 
@@ -673,16 +673,16 @@ function createCommentWindow() {
         t3 = t3.scale(0);
         w.close({transform:t3,duration:300});
     });
-    
+
     /*
     var commentWinLabel1 = Titanium.UI.createLabel({
-        
+
     });
     */
-    
+
     //Titanium.API.debug("data:" + dedata[c]);
     var commentData = [];
-    
+
     var commentWinTable = Titanium.UI.createTableView({
         data:commentData,
         style: Titanium.UI.iPhone.TableViewStyle.GROUPED,
@@ -694,7 +694,7 @@ function createCommentWindow() {
     });
     //w.add(commentWinTable);
     Titanium.API.debug('opening comment window');
-   
+
 
     w.open(a);
 

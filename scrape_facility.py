@@ -12,6 +12,10 @@ DB_DATABASE = "fsi"
 DB_HOST = "localhost"
 
 question_id = 0 # Global comment xref to tie it to a specific question
+facilitydetailid = ""
+
+
+
 
 def parseFacilityPage(page):
 	inspections = []
@@ -23,6 +27,7 @@ def parseFacilityPage(page):
 	comments = []
 	compliancedescriptiontext = ""
 	global question_id
+	global facilitydetailid
 
 	for node in page.getElementsByTagName('doc'):
 		for child in node.getElementsByTagName('arr'):
@@ -30,17 +35,16 @@ def parseFacilityPage(page):
 				print "\tENGLISH INSPECTIONS"
 				for child in child.getElementsByTagName('inspection'):
 					if child.getAttribute('inspectionid') !="": #id
-						facilitydetailid = ""
 						print "\t\tFound Inspection ID" + child.getAttribute('inspectionid')
 						inspection_id = child.getAttribute('inspectionid')
 						facilitydetailid = child.getAttribute('facilitydetailid')
-						inspection_date = child.getAttribute('inspectiondate')
+						inspection_date = child.getAttribute('inspectiondate').rstrip(' 00:00:00.000')
 						in_compliance = child.getAttribute('isincompliance')
 						if (in_compliance == ''):
 							in_compliance = 0
-						closure_date = child.getAttribute('closuredate')
+						closure_date = child.getAttribute('closuredate').rstrip(' 00:00:00.000')
 						report_number = child.getAttribute('reportnumber')
-
+						q = 0
 						# Loop through each question and get the details for each inspection question
 						for child in child.getElementsByTagName('question'):
 							question = []
@@ -60,7 +64,9 @@ def parseFacilityPage(page):
 
 							## Fetch comment text within <comment> element - there can be more than 1 comment per question
 							comment = child.getElementsByTagName('comment')
+							ccount = 0
 							for element in comment:
+								ccount = ccount +1
 								comments.append((question_id, element.firstChild.data))
 							#print "\t\t\tComments"
 							#print comments
@@ -68,7 +74,7 @@ def parseFacilityPage(page):
 					#			 = child.firstChild.data
 					#		for child in node.getElementsByTagName('comment')
 					#			compliancedescriptiontext = child.firstChild.data
-
+							print str(ccount) + " comments."
 							# Add to questions stack
 							question.append((question_id, inspection_id, sort, complianceresultcode, risklevel, compliancecategorycode, compliancedescriptioncode))
 							#print "\t\t\tQuestion"
@@ -83,9 +89,8 @@ def parseFacilityPage(page):
 
 							# add to description stack #todo
 							#compliance_descriptions.append(compliancedescriptioncode,compliancedescriptiontext)
-						questions.append(question)
+							questions.append(question)
 						inspections.append((inspection_id,facilitydetailid,inspection_date, in_compliance, closure_date, report_number))
-
 			if child.getAttribute('name')=="fs_insp_fr": #id
 				print "\tFRENCH INSPECTIONS"
 				#print child.firstChild.data
@@ -100,16 +105,19 @@ def parseFacilityPage(page):
 
 	db = MySQLdb.connect(host=DB_HOST, user=DB_USER, passwd=DB_PASSWORD,db=DB_DATABASE)
 	cursor = db.cursor()
-	print "\t\tInserting Inspections for " + facilitydetailid
+	print "\n\tInserting Inspections for " + facilitydetailid
 	for item in inspections:
-		print item
+	#	print item
 		cursor.execute("INSERT INTO api_inspection (id, facilitydetailid, inspectiondate, isincompliance,closuredate, reportnumber) VALUES (%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE id = VALUES(id)", item)
 
 	print "\t\tInserting Questions for " + facilitydetailid
+	q = 0
 	for question in questions:
 		for item in question:
 			#print "blah"
 			cursor.execute("INSERT INTO api_question (id, inspection_id_id, sort, complianceresultcode, risklevelid,compliancecategorycode, compliancedescriptioncode) VALUES (%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE id = VALUES(id)", item)
+			q = q + 1
+	print "\t\t" + str(q) + " questions"
 
 	print "\t\tInserting Comments for " + facilitydetailid
 	for comment in comments:
@@ -149,12 +157,13 @@ cursor.execute("TRUNCATE api_inspection") # clear out existing inspections
 cursor.close()
 
 # Fetch result set to loop through to get details for
+#db.query("SELECT detailid FROM api_facility WHERE detailid = 'B789A388-ED35-490D-A68F-518EA3893A88'") # 1 FOR 1 PIZZA
 #db.query("SELECT detailid FROM api_facility WHERE detailid = 'B789A388-ED35-490D-A68F-518EA3893A88' OR detailid = 'F1583008-A6C6-4070-9F3E-D4CB0D97AE20'")#
 db.query("SELECT detailid FROM api_facility")#
 r = db.store_result()
 for row in r.fetch_row(6000):
 	scrape_facility(row[0]) # row [0] is the detail id
-	time.sleep(3) # wait three seconds
+	time.sleep(2) # wait two seconds
 
 
 end = time.time()
