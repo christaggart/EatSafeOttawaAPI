@@ -171,15 +171,15 @@ function populateTable(info) {
            {
 			   	    showIndicator();
 					 try {
-					        if (!xhr) {
-					            var xhr = Titanium.Network.createHTTPClient();
-					        }
-					        detailsUrl = 'http://eatsafe-api.heroku.com/facility/'+detailId;
+				            var xhr = Titanium.Network.createHTTPClient();
+					        detailsUrl = 'http://eatsafe-api.heroku.com/facility/B789A388-ED35-490D-A68F-518EA3893A88' //'http://eatsafe-api.heroku.com/facility/'+info[e.index].id;
 					        xhr.open('GET',detailsUrl);
 					        Titanium.API.debug("getting results - " + detailsUrl);
 
 					        xhr.onload = function() {
+					            Ti.API.debug('got results....');
 					            results = JSON.parse(this.responseText);
+					            Ti.API.debug(results);
 					            var detail = Titanium.UI.createWindow({
 									backgroundColor:'#fff',
 									barColor:'#000',
