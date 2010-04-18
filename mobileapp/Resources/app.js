@@ -139,10 +139,11 @@ function populateTable(info) {
                        color:'#333',
                        font:{fontSize:13,fontWeight:'bold', fontFamily:'Helvetica'}, left:10,top:5,  height:20, width:270,text:info[i].name
             });
-            title.addEventListener('singletap', function(e)
+            /*title.addEventListener('singletap', function(e)
             {
                var rowNum = e.source.rowNum;
             });
+            */
 
            row.filter = title.text;
            title.rowNum = i+1;
@@ -158,10 +159,11 @@ function populateTable(info) {
                        width:200,
                        text:info[i].street_number + " " + info[i].street_name + ' (' + (Math.round(info[i].distance*100)/100) + ' km)'
                });
-           address.addEventListener('singletap', function(e)
+           /*address.addEventListener('singletap', function(e)
            {
                var rowNum = e.source.rowNum;
            });
+           */
            row.add(address);
 
 
@@ -169,10 +171,10 @@ function populateTable(info) {
            // create table view row event listener
            row.addEventListener('singletap', function(e)
            {
-			   	    showIndicator();
+                    showIndicator();
 					 try {
 				            var xhr = Titanium.Network.createHTTPClient();
-					        detailsUrl = 'http://eatsafe-api.heroku.com/facility/B789A388-ED35-490D-A68F-518EA3893A88' //'http://eatsafe-api.heroku.com/facility/'+info[e.index].id;
+					        detailsUrl = 'http://eatsafe-api.heroku.com/facility/' + info[e.index].id,
 					        xhr.open('GET',detailsUrl);
 					        Titanium.API.debug("getting results - " + detailsUrl);
 
@@ -190,7 +192,7 @@ function populateTable(info) {
                                 var nameLabel = Ti.UI.createLabel({
                                     color: '#333',
                                     //backgroundColor: '#000',
-                                    text:results[0].name,
+                                    text:results.name,
                                     font:{fontSize:18,fontWeight:'bold', fontFamily:'Helvetica'},
                                     height:'auto',
                                     width:'auto',
@@ -202,7 +204,7 @@ function populateTable(info) {
                                 var addressLabel = Ti.UI.createLabel({
                                     color:'#222',
                                     font:{fontSize:14,fontWeight:'normal', fontFamily:'Helvetica'},
-                                    text:results[0].street_number + ' ' + results[0].street_name,
+                                    text:results.street_number + ' ' + results.street_name,
                                     height:'auto',
                                     width:'auto',
                                     left:10,
@@ -212,10 +214,10 @@ function populateTable(info) {
 
 						        // create table view data object
 						        var dedata = [];
-                                 Ti.API.debug(results);
+                                 //Ti.API.debug(results);
 
                                 //Ti.API.debug(results[0].inspections.length);
-						        for (var c=0;c<results[0].inspections.length;c++)
+						        for (var c=0;c<results.inspections.length;c++)
 						        {
 
                                     dedata[c] = Ti.UI.createTableViewSection();
@@ -227,7 +229,7 @@ function populateTable(info) {
                                         touchEnabled:false,
                                         selectionStyle:Titanium.UI.iPhone.TableViewCellSelectionStyle.NONE,
                                     	font:{fontSize:16,fontWeight:'normal', fontFamily:'Helvetica'},
-                                        text:' Inspection                          ' + format_mysqldate(results[0].inspections[c].date),
+                                        text:' Inspection                          ' + format_mysqldate(results.inspections[c].inspection_date),
                                         height:'auto',
                                         width:'auto',
                                         left:10
@@ -241,12 +243,12 @@ function populateTable(info) {
                                     dedata[c].add(row);
 
                                     Ti.API.debug("loop " + c);
-                                    if (results[0].inspections[c].questions != null && results[0].inspections[c].questions != 0) {
-                                        Ti.API.debug("questions:  " + results[0].inspections[c].questions.length);
+                                    if (results.inspections[c].questions != null && results.inspections[c].questions != 0) {
+                                        Ti.API.debug("questions:  " + results.inspections[c].questions.length);
 										var lastCategory = "";
-                                        for (var x=0;x<results[0].inspections[c].questions.length;x++)
+                                        for (var x=0;x<results.inspections[c].questions.length;x++)
                                         {
-											if (lastCategory != results[0].inspections[c].questions[x].category) {
+											if (lastCategory != results.inspections[c].questions[x].category) {
 
 												// Only show category label if not already showing that category
 												var categoryLabel = Ti.UI.createLabel({
@@ -254,7 +256,7 @@ function populateTable(info) {
 													className:'catLabel'+x,
 	                                                backgroundColor: '#0066CC',
 	                                    			font:{fontSize:11,fontWeight:'bold', fontFamily:'Helvetica'},
-	                                                text:results[0].inspections[c].questions[x].category,
+	                                                text:results.inspections[c].questions[x].category,
 	                                                height:15,
 	                                                width:280,
 
@@ -270,7 +272,7 @@ function populateTable(info) {
 	                                            });
 	                                            row.add(categoryLabel);
 	                                            dedata[c].add(row);
-												lastCategory = results[0].inspections[c].questions[x].category;
+												lastCategory = results.inspections[c].questions[x].category;
 											}
 
 
@@ -279,7 +281,7 @@ function populateTable(info) {
 												className:'qLabel'+x,
                                                 backgroundColor: 'transparent',
                                     			font:{fontSize:12,fontWeight:'normal', fontFamily:'Helvetica'},
-                                                text:results[0].inspections[c].questions[x].description,
+                                                text:results.inspections[c].questions[x].description,
                                                 height:'auto',
 												top:10,
 												bottom:10,
@@ -309,14 +311,14 @@ function populateTable(info) {
                                             });
 
                                             // Comment rows
-                                            for(var i = 0; results[0].inspections[c].questions[x].comments != null &&
-                                                i<results[0].inspections[c].questions[x].comments.length; i++) {
+                                            for(var i = 0; results.inspections[c].questions[x].comments != null &&
+                                                i<results.inspections[c].questions[x].comments.length; i++) {
                                                 var commentLabel = Ti.UI.createLabel({
                                                     color: '#000',
-                                                    className:'qLabel'+i,
+                                                    className:'cLabel'+i,
                                                     backgroundColor: 'transparent',
                                                     font:{fontSize:12,fontWeight:'normal', fontFamily:'Helvetica'},
-                                                    text:'Comment:' + "\n" + results[0].inspections[c].questions[x].comments[i].text_en,
+                                                    text:'Comment:' + "\n" + results.inspections[c].questions[x].comments[i].text_en,
                                                     height:'auto',
                                                     top:10,
                                                     bottom:10,
@@ -324,7 +326,7 @@ function populateTable(info) {
                                                     left:10
                                                 });
                                                 var row = Ti.UI.createTableViewRow({height:'auto',
-                                                    className:'qRow'+i,
+                                                    className:'cRow'+i,
                                                     backgroundColor:'#fff',
                                                     touchEnabled:false,
                                                     selectionStyle:Titanium.UI.iPhone.TableViewCellSelectionStyle.NONE,
@@ -351,7 +353,9 @@ function populateTable(info) {
                                         width:250,
                                         left:10
                                         });
-                                        var row = Ti.UI.createTableViewRow({height:'auto',
+                                        var row = Ti.UI.createTableViewRow({
+                                            className:'NoCRow'+c,
+                                            height:'auto',
                                             backgroundColor:'#fff',
                                             color:'#FFF'});
 
@@ -475,7 +479,12 @@ function getResults(term) {  // term = "search term"
             if (!xhr) {
                 var xhr = Titanium.Network.createHTTPClient();
             }
-            nearbyUrl = 'http://eatsafe-api.heroku.com/facilities/nearby?lat='+lat+"&lon="+lon;
+            if (term) {
+                nearbyUrl = 'http://eatsafe-api.heroku.com/facilities/search?q=' + term;
+            }
+            else {
+                nearbyUrl = 'http://eatsafe-api.heroku.com/facilities/nearby?lat='+lat+"&lon="+lon;
+            }
             xhr.open('GET',nearbyUrl);
             Titanium.API.debug("getting results - " + nearbyUrl);
 
@@ -561,7 +570,7 @@ search.addEventListener('change', function(e)
 
 search.addEventListener('return', function(e)
 {
-   getResults(e.value, false);
+   getResults(e.value);
    search.blur();
 });
 search.addEventListener('cancel', function(e)
