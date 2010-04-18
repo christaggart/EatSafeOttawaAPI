@@ -156,7 +156,7 @@ function populateTable(info) {
                        left:10,
                        top:24,
                        height:20,
-                       width:200,
+                       width:270,
                        text:info[i].street_number + " " + info[i].street_name + ' (' + (Math.round(info[i].distance*100)/100) + ' km)'
                });
            /*address.addEventListener('singletap', function(e)
@@ -183,7 +183,7 @@ function populateTable(info) {
 					            results = JSON.parse(this.responseText);
 					            Ti.API.debug(results);
 					            var detail = Titanium.UI.createWindow({
-									backgroundColor:'#fff',
+									//backgroundColor:'#fff',
 									barColor:'#000',
 									translucent:false,
                                     backgroundColor:'#E0E0E0'
@@ -200,6 +200,9 @@ function populateTable(info) {
                                     top:5
                                 });
                                 detail.add(nameLabel);
+                                
+                                var topPos = 25*(Math.floor(results.name.length/25) + 1);
+                                Ti.API.debug('topPos: ' + topPos);
 
                                 var addressLabel = Ti.UI.createLabel({
                                     color:'#222',
@@ -208,7 +211,7 @@ function populateTable(info) {
                                     height:'auto',
                                     width:'auto',
                                     left:10,
-                                    top:25
+                                    top:topPos
                                 });
                                 detail.add(addressLabel);
 
@@ -280,12 +283,12 @@ function populateTable(info) {
                                                 color: '#000',
 												className:'qLabel'+x,
                                                 backgroundColor: 'transparent',
-                                    			font:{fontSize:12,fontWeight:'normal', fontFamily:'Helvetica'},
+                                    			font:{fontSize:12,fontWeight:'bold', fontFamily:'Helvetica'},
                                                 text:results.inspections[c].questions[x].description,
                                                 height:'auto',
 												top:10,
 												bottom:10,
-                                                width:250,
+                                                width:240,
                                                 left:10
                                             });
                                             var row = Ti.UI.createTableViewRow({height:'auto',
@@ -293,7 +296,7 @@ function populateTable(info) {
                                                 backgroundColor:'#fff',
                                                 touchEnabled:false,
                                                 //selectionStyle:Titanium.UI.iPhone.TableViewCellSelectionStyle.NONE,
-                                                //layout:'vertical',
+                                                layout:'vertical',
                                                 height:'auto',
                                                 color:'#FFF'
                                             });
@@ -301,7 +304,7 @@ function populateTable(info) {
                                             row.add(questionLabel);
                                             complianceImage = Titanium.UI.createImageView({url:'notincompliance.png', left:234,top:5,right:0});
 										    row.add(complianceImage);
-                                            dedata[c].add(row);
+                                            //dedata[c].add(row);
                                             row.addEventListener('singletap', function(e)
                                             {
                                                 Ti.API.debug("row: " + e.row);
@@ -309,7 +312,7 @@ function populateTable(info) {
                                                 Ti.API.debug("dedata: " + dedata[0]);
                                                 createCommentWindow(dedata);
                                             });
-
+                                            Ti.API.debug('row height: ' + questionLabel.height);
                                             // Comment rows
                                             for(var i = 0; results.inspections[c].questions[x].comments != null &&
                                                 i<results.inspections[c].questions[x].comments.length; i++) {
@@ -317,14 +320,15 @@ function populateTable(info) {
                                                     color: '#000',
                                                     className:'cLabel'+i,
                                                     backgroundColor: 'transparent',
-                                                    font:{fontSize:12,fontWeight:'normal', fontFamily:'Helvetica'},
-                                                    text:'Comment:' + "\n" + results.inspections[c].questions[x].comments[i].text_en,
+                                                    font:{fontSize:12, fontStyle:'italic', fontFamily:'Helvetica'},
+                                                    text:results.inspections[c].questions[x].comments[i].text_en,
                                                     height:'auto',
-                                                    top:10,
+                                                    top:10,//35*(i+1),
                                                     bottom:10,
-                                                    width:250,
-                                                    left:10
+                                                    width:235,
+                                                    left:25
                                                 });
+                                                /*
                                                 var row = Ti.UI.createTableViewRow({height:'auto',
                                                     className:'cRow'+i,
                                                     backgroundColor:'#fff',
@@ -334,10 +338,12 @@ function populateTable(info) {
                                                     height:'auto',
                                                     color:'#FFF'
                                                 });
+                                                */
 
                                                 row.add(commentLabel);
-                                                dedata[c].add(row);
+                                                //dedata[c].add(row);
                                             }
+                                            dedata[c].add(row);
 
 
 
@@ -384,7 +390,7 @@ function populateTable(info) {
 								            style: Titanium.UI.iPhone.TableViewStyle.GROUPED,
 								            //rowHeight:80,
 								            minRowHeight:30,
-                                            top:50,
+                                            top:30+topPos,
                                             backgroundColor:'#E0E0E0'
 								            //maxRowHeight:500,
 								        });
