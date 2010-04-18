@@ -29,7 +29,7 @@ var data = [];
 
 // TODO fix this
 function startup() {
-    getResults('');
+    getLocation();
 };
 
 //
