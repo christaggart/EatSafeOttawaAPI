@@ -302,8 +302,9 @@ function populateTable(info) {
                                             });
 
                                             row.add(questionLabel);
-                                            complianceImage = Titanium.UI.createImageView({url:'notincompliance.png', left:234,top:5,right:0});
-										    row.add(complianceImage);
+                                            //complianceImage = Titanium.UI.createImageView({url:'notincompliance.png', left:234,top:5,right:0});
+										    //row.add(complianceImage);
+                                            row.rightImage = "notincompliance.png";
                                             //dedata[c].add(row);
                                             row.addEventListener('singletap', function(e)
                                             {
@@ -322,6 +323,7 @@ function populateTable(info) {
                                                     backgroundColor: 'transparent',
                                                     font:{fontSize:12, fontStyle:'italic', fontFamily:'Helvetica'},
                                                     text:results.inspections[c].questions[x].comments[i].text_en,
+                                                    //text:'test comment. c = ' + c + ', x = ' + x + ', i = ' + i,
                                                     height:'auto',
                                                     top:10,//35*(i+1),
                                                     bottom:10,
@@ -340,7 +342,11 @@ function populateTable(info) {
                                                 });
                                                 */
 
-                                                row.add(commentLabel);
+                                                Ti.API.debug('inspection date: ' + format_mysqldate(results.inspections[c].inspection_date));
+                                                Ti.API.debug('text: ' + results.inspections[c].questions[x].comments[i].text_en);
+                                                if (results.inspections[c].questions[x].comments[i].text_en != null) {
+                                                    row.add(commentLabel);
+                                                }
                                                 //dedata[c].add(row);
                                             }
                                             dedata[c].add(row);
@@ -367,8 +373,9 @@ function populateTable(info) {
 
                                         row.add(questionLabel);
 										// Add compliance image
-                                        complianceImage = Titanium.UI.createImageView({url:'incompliance.png', left:234,top:5,right:0});
-									    row.add(complianceImage);
+                                        //complianceImage = Titanium.UI.createImageView({url:'incompliance.png', left:234,top:5,right:0});
+									    //row.add(complianceImage);
+                                        row.rightImage = "incompliance.png";
                                         dedata[c].add(row);
 
                                         row.addEventListener('singletap', function(e)
