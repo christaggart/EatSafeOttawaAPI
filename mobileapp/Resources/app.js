@@ -177,7 +177,16 @@ function populateTable(info) {
 					        detailsUrl = 'http://eatsafe-api.heroku.com/facility/' + info[e.index].id,
 					        xhr.open('GET',detailsUrl);
 					        Titanium.API.debug("getting results - " + detailsUrl);
+					        xhr.setTimeout(15000);
+                            xhr.onerror = function() {
+                                Titanium.UI.createAlertDialog({
+                                    title: "Network Timeout",
+                                    message: String("Can't connect to the internet."),
+                                    buttonNames: ['OK']
+                                }).show();
+                                hideIndicator();
 
+                            };
 					        xhr.onload = function() {
 					            Ti.API.debug('got results....');
 					            results = JSON.parse(this.responseText);
@@ -200,7 +209,7 @@ function populateTable(info) {
                                     top:5
                                 });
                                 detail.add(nameLabel);
-                                
+
                                 var topPos = 25*(Math.floor(results.name.length/25) + 1);
                                 Ti.API.debug('topPos: ' + topPos);
 
@@ -240,6 +249,7 @@ function populateTable(info) {
 
                                     var row = Ti.UI.createTableViewRow({height:'auto',
 										backgroundColor:'#000',
+                                        selectionStyle:Titanium.UI.iPhone.TableViewCellSelectionStyle.NONE,
 										className: 'row'+c,
 										color:'#FFF'});
                                     row.add(label);
@@ -270,8 +280,7 @@ function populateTable(info) {
 													className:'catRow'+x,
 	                                                height:'auto',
 	                                                color:'#FFF',
-	                                                touchEnabled:false,
-	                                                selectionStyle:Titanium.UI.iPhone.TableViewCellSelectionStyle.NONE
+                                                    selectionStyle:Titanium.UI.iPhone.TableViewCellSelectionStyle.NONE
 	                                            });
 	                                            row.add(categoryLabel);
 	                                            dedata[c].add(row);
@@ -294,26 +303,16 @@ function populateTable(info) {
                                             var row = Ti.UI.createTableViewRow({height:'auto',
 												className:'qRow'+x,
                                                 backgroundColor:'#fff',
-                                                touchEnabled:false,
-                                                //selectionStyle:Titanium.UI.iPhone.TableViewCellSelectionStyle.NONE,
+                                                selectionStyle:Titanium.UI.iPhone.TableViewCellSelectionStyle.NONE,
                                                 layout:'vertical',
                                                 height:'auto',
                                                 color:'#FFF'
                                             });
 
                                             row.add(questionLabel);
-                                            //complianceImage = Titanium.UI.createImageView({url:'notincompliance.png', left:234,top:5,right:0});
-										    //row.add(complianceImage);
                                             row.rightImage = "notincompliance.png";
-                                            //dedata[c].add(row);
-                                            row.addEventListener('singletap', function(e)
-                                            {
-                                                Ti.API.debug("row: " + e.row);
-                                                Ti.API.debug("index: " + e.index);
-                                                Ti.API.debug("dedata: " + dedata[0]);
-                                                createCommentWindow(dedata);
-                                            });
                                             Ti.API.debug('row height: ' + questionLabel.height);
+
                                             // Comment rows
                                             for(var i = 0; results.inspections[c].questions[x].comments != null &&
                                                 i<results.inspections[c].questions[x].comments.length; i++) {
@@ -330,17 +329,6 @@ function populateTable(info) {
                                                     width:235,
                                                     left:25
                                                 });
-                                                /*
-                                                var row = Ti.UI.createTableViewRow({height:'auto',
-                                                    className:'cRow'+i,
-                                                    backgroundColor:'#fff',
-                                                    touchEnabled:false,
-                                                    selectionStyle:Titanium.UI.iPhone.TableViewCellSelectionStyle.NONE,
-                                                    //layout:'vertical',
-                                                    height:'auto',
-                                                    color:'#FFF'
-                                                });
-                                                */
 
                                                 Ti.API.debug('inspection date: ' + format_mysqldate(results.inspections[c].inspection_date));
                                                 Ti.API.debug('text: ' + results.inspections[c].questions[x].comments[i].text_en);
@@ -377,20 +365,39 @@ function populateTable(info) {
 									    //row.add(complianceImage);
                                         row.rightImage = "incompliance.png";
                                         dedata[c].add(row);
-
-                                        row.addEventListener('singletap', function(e)
-                                        {
-                                            Ti.API.debug("row: " + e.row);
-                                            Ti.API.debug("index: " + e.index);
-                                            Ti.API.debug("dedata: " + dedata[0]);
-                                            createCommentWindow(dedata);
-                                        });
                                     }
 
                                 }
 
+
 									    Ti.API.debug("done loop ");
                                         // create table view
+                                        dedata[c+1] = Ti.UI.createTableViewSection();
+
+                                        var updateLabel = Ti.UI.createLabel({
+                                             color: '#333',
+                                             backgroundColor: 'transparent',
+                               		         font:{fontSize:12,fontWeight:'normal', fontFamily:'Helvetica'},
+                                             text:"Last updated "+ isoDateStringToDate(results.updated_at) + ".",
+                                             height:'45',
+                                             width:250,
+                                             left:10
+                                        });
+
+                                        var updateRow = Ti.UI.createTableViewRow({
+                                            className:'updateRow'+c,
+                                            height:'auto',
+                                            backgroundColor:'#eee',
+                                            borderWidth:0,
+                                            selectionStyle:Titanium.UI.iPhone.TableViewCellSelectionStyle.NONE,
+                                            borderColor:'#eee',
+                                            color:'transparent'});
+
+                                        updateRow.add(updateLabel);
+                                        dedata[c+1].add(updateRow);
+
+
+                                        //detailview.add(update_section);
 
 								        var detailview = Titanium.UI.createTableView({
 								            data:dedata,
@@ -401,8 +408,9 @@ function populateTable(info) {
                                             backgroundColor:'#E0E0E0'
 								            //maxRowHeight:500,
 								        });
-
 						        detail.add(detailview);
+
+
 
 
 						        //actInd.show();
@@ -491,6 +499,7 @@ function getResults(term) {  // term = "search term"
         try {
             if (!xhr) {
                 var xhr = Titanium.Network.createHTTPClient();
+                xhr.setTimeout(15000);
             }
             if (term) {
                 nearbyUrl = 'http://eatsafe-api.heroku.com/facilities/search?q=' + term;
@@ -498,6 +507,7 @@ function getResults(term) {  // term = "search term"
             else {
                 nearbyUrl = 'http://eatsafe-api.heroku.com/facilities/nearby?lat='+lat+"&lon="+lon;
             }
+
             xhr.open('GET',nearbyUrl);
             Titanium.API.debug("getting results - " + nearbyUrl);
 
@@ -505,6 +515,15 @@ function getResults(term) {  // term = "search term"
                 results = JSON.parse(this.responseText);
   				Titanium.API.debug(results);
                 populateTable(results);
+            };
+            xhr.onerror = function() {
+                Titanium.UI.createAlertDialog({
+                    title: "Network Timeout",
+                    message: String("Can't connect to the internet."),
+                    buttonNames: ['OK']
+                }).show();
+                hideIndicator();
+
             };
             xhr.send();
         }
@@ -728,7 +747,8 @@ function createCommentWindow() {
 var win2 = Titanium.UI.createWindow({
     title:'About',
     barColor: '#000',
-    backgroundColor:'#000'
+    backgroundColor:'#000',
+    backgroundImage:'about1.png'
 });
 var tab2 = Titanium.UI.createTab({
     icon:'KS_nav_ui.png',
@@ -736,17 +756,9 @@ var tab2 = Titanium.UI.createTab({
     window:win2
 });
 
-var label2 = Titanium.UI.createLabel({
-	color:'#999',
-	text:'I am Window 2',
-	font:{fontSize:20,fontFamily:'Helvetica Neue'}
-});
-
-win2.add(label2);
-
 win2.addEventListener('touchstart', function(e)
 {
-    Titanium.UI.createAlertDialog({title:'TEST',message:'win2 touchstart eventlistener.'}).show();
+    Ti.Platform.openURL('http://openottawa.org/eatsafeapp')
 });
 
 //

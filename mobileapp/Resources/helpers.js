@@ -35,3 +35,45 @@ function format_date (date) {
 	var date_formatted = month+' '+day+', '+year;
 	return date_formatted;
 }
+
+
+function isoDateStringToDate (datestr) {
+  if (! this.re) {
+    // The date in YYYY-MM-DD or YYYYMMDD format
+    var datere = "(\\d{4})-?(\\d{2})-?(\\d{2})";
+    // The time in HH:MM:SS[.uuuu] or HHMMSS[.uuuu] format
+    var timere = "(\\d{2}):?(\\d{2}):?(\\d{2}(?:\\.\\d+)?)";
+    // The timezone as Z or in +HH[:MM] or -HH[:MM] format
+    var tzre = "(Z|(?:\\+|-)\\d{2}(?:\\:\\d{2})?)?";
+    this.re = new RegExp("^" + datere + "[ T]" + timere + tzre + "$");
+  }
+
+  var matches = this.re.exec(datestr);
+  if (! matches)
+    return null;
+
+  var year = matches[1];
+  var month = matches[2] - 1;
+  var day = matches[3];
+  var hour = matches[4];
+  var minute = matches[5];
+  var second = Math.floor(matches[6]);
+  var ms = matches[6] - second;
+  var tz = matches[7];
+  var ms = 0;
+  var offset = 0;
+
+  if (tz && tz != "Z") {
+    var tzmatches = tz.match(/^(\+|-)(\d{2})(\:(\d{2}))$/);
+    if (tzmatches) {
+      offset = Number(tzmatches[2]) * 60 + Number(tzmatches[4]);
+      if (tzmatches[1] == "-")
+        offset = -offset;
+    }
+  }
+
+  offset *= 60 * 1000;
+  var dateval = Date.UTC(year, month, day, hour, minute, second, ms) - offset;
+
+  return new Date(dateval);
+}
