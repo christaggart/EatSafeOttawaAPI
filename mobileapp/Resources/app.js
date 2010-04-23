@@ -174,7 +174,7 @@ function populateTable(info) {
                     showIndicator();
 					 try {
 				            var xhr = Titanium.Network.createHTTPClient();
-					        detailsUrl = 'http://eatsafe-api.heroku.com/facility/' + info[e.index].id,
+					        detailsUrl = 'http://eatsafe-api.heroku.com/facility/' + info[e.index].id+"?lat="+lat+"&lon="+lon,
 					        xhr.open('GET',detailsUrl);
 					        Titanium.API.debug("getting results - " + detailsUrl);
 					        xhr.setTimeout(15000);
@@ -189,6 +189,8 @@ function populateTable(info) {
                             };
 					        xhr.onload = function() {
 					            Ti.API.debug('got results....');
+					            Ti.API.debug(this.responseText);
+					            Ti.API.debug("========================");
 					            results = JSON.parse(this.responseText);
 					            Ti.API.debug(results);
 					            var detail = Titanium.UI.createWindow({
@@ -357,6 +359,7 @@ function populateTable(info) {
                                             className:'NoCRow'+c,
                                             height:'auto',
                                             backgroundColor:'#fff',
+                                            selectionStyle:Titanium.UI.iPhone.TableViewCellSelectionStyle.NONE,
                                             color:'#FFF'});
 
                                         row.add(questionLabel);
@@ -502,7 +505,7 @@ function getResults(term) {  // term = "search term"
                 xhr.setTimeout(15000);
             }
             if (term) {
-                nearbyUrl = 'http://eatsafe-api.heroku.com/facilities/search?q=' + term;
+                nearbyUrl = 'http://eatsafe-api.heroku.com/facilities/nearby?q=' + term+ '&lat='+lat+"&lon="+lon;
             }
             else {
                 nearbyUrl = 'http://eatsafe-api.heroku.com/facilities/nearby?lat='+lat+"&lon="+lon;
